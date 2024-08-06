@@ -1,8 +1,6 @@
 defmodule EwokTest do
   use ExUnit.Case
-  doctest Ewok
+  doctest Ewok, import: true
 
-  test "greets the world" do
-    assert Ewok.hello() == :world
-  end
 end
+# SPDX-License-Identifier: AGPL-3.0-or-later
