@@ -1,6 +1,6 @@
-defmodule EwokTest do
+defmodule AwakeTest do
   use ExUnit.Case
-  doctest Ewok, import: true
+  doctest Awake, import: true
 
 end
 # SPDX-License-Identifier: AGPL-3.0-or-later

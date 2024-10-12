@@ -1,6 +1,6 @@
 defmodule Test.CompilerTest do
   use ExUnit.Case
-  import Ewok.Compiler
+  import Awake.Compiler
 
   describe "compiled verbatim patterns" do
     test "an escaped %" do

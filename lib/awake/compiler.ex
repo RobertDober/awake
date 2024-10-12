@@ -1,9 +1,9 @@
-defmodule Ewok.Compiler do
-  use Ewok.Types
+defmodule Awake.Compiler do
+  use Awake.Types
 
   import Minipeg.Parser, only: [parse_string: 2]
 
-  alias Ewok.Compiler.Parsers, as: P
+  alias Awake.Compiler.Parsers, as: P
   import Minipeg.{Combinators, Parsers}
 
   @moduledoc ~S"""

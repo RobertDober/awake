@@ -1,5 +1,5 @@
-defmodule Ewok.Compiler.Mappers do
-  use Ewok.Types
+defmodule Awake.Compiler.Mappers do
+  use Awake.Types
 
   @spec mk_field(map(), list()) :: tuple()
   def mk_field(predefined, ast)

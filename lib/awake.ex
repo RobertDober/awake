@@ -1,7 +1,7 @@
-defmodule Ewok do
-  use Ewok.Types
+defmodule Awake do
+  use Awake.Types
 
-  alias Ewok.Compiler
+  alias Awake.Compiler
   @moduledoc ~S"""
 
   ## Synopsis
@@ -9,7 +9,7 @@ defmodule Ewok do
   An _awk_ like 'mini language', with a more concise syntax (tailored for command line usage)
   and a little bit less powerful (for now).
 
-  _Ewok_ applies a pattern to each input line.
+  _Awake_ applies a pattern to each input line.
 
   The pattern is composed by a sequence of  _verbatim text_, _field_definitions_ and 
   _function_pipelines_.

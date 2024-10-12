@@ -1,8 +1,8 @@
-defmodule Ewok.Compiler.Parsers do
-  use Ewok.Types
+defmodule Awake.Compiler.Parsers do
+  use Awake.Types
 
   import Minipeg.{Combinators, Parsers}
-  alias Ewok.Compiler.Mappers, as: M
+  alias Awake.Compiler.Mappers, as: M
 
   @predefined_fields %{
     "e" => {:e}, 

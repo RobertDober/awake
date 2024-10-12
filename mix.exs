@@ -1,7 +1,7 @@
-defmodule Ewok.MixProject do
+defmodule Awake.MixProject do
   use Mix.Project
 
-  @project "Ewok"
+  @project "Awake"
   @version "0.1.0"
   @release_date "2024-08-06"
 
@@ -33,7 +33,7 @@ defmodule Ewok.MixProject do
   end
 
   defp escript_config do
-    [main_module: Ewok.Cli]
+    [main_module: Awake.Cli]
   end
 
   defp package do
