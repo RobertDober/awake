@@ -3,9 +3,9 @@ defmodule Awake.MixProject do
 
   @project "Awake"
   @version "0.1.0"
-  @release_date "2024-08-06"
+  @release_date "2025-01-30"
 
-  @url "https://github.com/robertdober/ewok"
+  @url "https://github.com/robertdober/awake"
 
   def project do
     [
@@ -13,7 +13,7 @@ defmodule Awake.MixProject do
       app: :ewok,
       deps: deps(),
       description: "Map lines with a powerful mini language",
-      elixir: "~> 1.17",
+      elixir: "~> 1.18",
       elixirc_paths: elixirc_paths(Mix.env()),
       escript: escript_config(),
       maintainers: [
@@ -66,9 +66,9 @@ defmodule Awake.MixProject do
   # Run "mix help deps" to learn about dependencies.
   defp deps do
     [
-      {:dialyxir, "~> 1.4.3", only: [:dev, :test], runtime: false},
-      {:excoveralls, "~> 0.18.2", only: [:test]},
-      {:minipeg, "~> 0.6.3"},
+      {:dialyxir, "~> 1.4.5", only: [:dev, :test], runtime: false},
+      {:excoveralls, "~> 0.18.5", only: [:test]},
+      {:minipeg, "~> 0.7.0"},
     ]
   end
 
