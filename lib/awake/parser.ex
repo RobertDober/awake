@@ -25,8 +25,18 @@ defmodule Awake.Parser do
 
   and also "("
 
-      iex(2)> parse("((")
+      iex(3)> parse("((")
       {:ok, [{:verb, "("}]}
+
+  verbs are glued together
+
+      iex(4)> parse("hello ((%%")
+      {:ok, [{:verb, "hello (%"}]}
+
+  but seperated by fields
+
+      iex(5)> parse("hello %c and more%%")
+      {:ok, [{:verb, "hello "}, {:field, "c"}, {:verb, " and more%"}]} 
 
   """
   @spec parse(binary()) :: Parser.result_tuple_t(ast_t())
