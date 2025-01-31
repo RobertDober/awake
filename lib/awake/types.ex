@@ -2,17 +2,12 @@ defmodule Awake.Types do
 
   defmacro __using__(_opts \\ []) do
     quote do
-      @type ast_entry_t :: binary() | field_t() | pipeline_t()
+      @type ast_entry_t :: verb_t() | field_t() | function_t()
       @type ast_t :: list(ast_entry_t)
 
-      @type binaries :: list(binary())
-
-      @type field_t :: atom()
-
-      @type pipeline_entry_t :: {atom(), list()}
-      @type pipeline_t :: list(pipeline_entry_t())
-
-      @type result_t(t) :: {:ok, t}, {:error, binary()}
+      @type field_t :: {:field, binary() | integer()}
+      @type function_t :: {atom(), list()}
+      @type verb_t :: {:verb, binary()}
     end
   end
 end

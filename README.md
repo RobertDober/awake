@@ -47,7 +47,26 @@ All text not containing a `%` or a `(` is verbatim text, and as mentioned above 
 be parsed as verbatim text containung `%` and `(` respectively.
 
 
+## Implementation
 
+This is implemented with a 3 phase compilation
+
+### Parser
+
+It parses a pattern into an _Abstract Syntax Tree_ (aka _AST_). Here is an example
+
+```elixir
+    "%ts hello %%"
+```
+
+becomes
+
+```elixir
+    [{:field, "ts"], {:verb "hello"}, # N.B. the first space is missing
+     {:verb, "%"}]
+```
+
+For a detailed description refer to the [doctests of the Parser](lib/awake/parser.ex)
 
 
 
