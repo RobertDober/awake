@@ -12,6 +12,8 @@ defmodule Awake.Parser do
   @doc ~S"""
   Parses the pattern
 
+  ### Verbatim chunks
+
   If we want to print a fixed text for each line of input from stdin, we can use
   a verbatim pattern
 
@@ -33,15 +35,44 @@ defmodule Awake.Parser do
       iex(4)> parse("hello ((%%")
       {:ok, [{:verb, "hello (%"}]}
 
-  but seperated by fields
+  ### Field chunks
+
+  verbs are seperated by fields
 
       iex(5)> parse("hello %c and more%%")
       {:ok, [{:verb, "hello "}, {:field, "c"}, {:verb, " and more%"}]} 
 
   fields are either predefined, or indices into fields
 
-      iex(6)> parse("%c%tms%2%-1 or %")
-      {:ok, [{:field, "c"}, {:field, "tms"}, {:field, 2}, {:field, -1}, {:verb, " or "}, {:field, 0}]}
+      iex(6)> parse("%c%tm%2%-1%t or %")
+      {:ok, [{:field, "c"}, {:field, "tm"}, {:field, 2}, {:field, -1}, {:field, "t"},  {:verb, " or "}, {:field, 0}]}
+
+  ### Ambigous patterns
+
+  Assumeing we want to parse the input into `[{:field, 0}, {:field, 0}]`
+  but, `"%%"` would be parsed into `[{:verb, "%"}]`.
+
+  And we want to parse the input into `[{:field, "t"}, {:verb, "s"}]` but `"%ts"` would be parsed into `[{:field, "ts"}]`
+
+  How can we fix this?
+
+  Enter the empty function, "`()`"
+
+  **N.B.** that we can get `[{:verb, "()"}]` easily enough from
+  the input `"(()"` and also that it is not part of the ast.
+
+      iex(7)> parse("%()%")
+      {:ok, [{:field, 0}, {:field, 0}]}
+
+      iex(8)> parse("%t()s")
+      {:ok, [{:field, "t"}, {:verb, "s"}]}
+
+  ### Function Pipelines
+
+  The syntax of function pipelines is simply a list of s-expressions
+
+      iex(9)> parse("%(+ 1 2)(tos 16) %c(lpad 5 0)")
+      {:ok, [{:field, 0}, {:func, [[:+, 1, 2],  [:tos, 16]]}, {:verb, " "}, {:field, "c"}, {:func, [[:lpad, 5, 0]]}]}
 
   """
   @spec parse(binary()) :: Parser.result_tuple_t(ast_t())

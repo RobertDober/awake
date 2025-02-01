@@ -1,6 +1,7 @@
 defmodule Awake.Grammar do
   use Awake.Types
   import Minipeg.{Combinators, Mappers, Parsers}
+  import Minipeg.Parsers.LispyParser, only: [s_exp_parser: 0]
   @moduledoc false
 
   @typep t :: Minipeg.Parser.t()
@@ -9,12 +10,14 @@ defmodule Awake.Grammar do
     sequence([
       many(select([
         verbs_parser(),
-        field_parser()
+        field_parser(),
+        empty_parser(),
+        function_pipeline_parser(),
       ]),
         "pattern parser",
         1),
       end_parser()])
-      |> map(&List.first/1) 
+      |> map(&List.first/1)
   end
 
   @spec double_escape_parsers(binary()) :: list(t())
@@ -26,12 +29,16 @@ defmodule Awake.Grammar do
     )
   end
 
+  @spec empty_parser() :: t()
+  defp empty_parser do
+    literal_parser("()") |> ignore()
+  end
 
-  @defined_fieldnames ~W[c now tms ts xs xms]
+  @defined_fieldnames ~W[c now tm t x xm]
   @spec field_name_parser() :: t()
   defp field_name_parser do
     @defined_fieldnames
-    |> Enum.map(&literal_parser(&1)) 
+    |> Enum.map(&literal_parser(&1))
     |> select()
   end
 
@@ -44,7 +51,13 @@ defmodule Awake.Grammar do
         int_parser()
       ]))
     ])
-    |> map(&make_field/1) 
+    |> map(&make_field/1)
+  end
+
+  @spec function_pipeline_parser() :: t()
+  def function_pipeline_parser do
+    many(s_exp_parser(), "function pipeline_parser", 1)
+    |>map(&{:func, &1})
   end
 
   @spec join_verb_asts(list(verb_t())) :: verb_t()
@@ -52,8 +65,8 @@ defmodule Awake.Grammar do
     {
       :verb,
       asts
-      |> Enum.map(fn {:verb, content} -> content end) 
-      |> Enum.join 
+      |> Enum.map(fn {:verb, content} -> content end)
+      |> Enum.join
     }
   end
 

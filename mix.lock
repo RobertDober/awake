@@ -3,5 +3,5 @@
   "erlex": {:hex, :erlex, "0.2.7", "810e8725f96ab74d17aac676e748627a07bc87eb950d2b83acd29dc047a30595", [:mix], [], "hexpm", "3ed95f79d1a844c3f6bf0cea61e0d5612a42ce56da9c03f01df538685365efb0"},
   "excoveralls": {:hex, :excoveralls, "0.18.5", "e229d0a65982613332ec30f07940038fe451a2e5b29bce2a5022165f0c9b157e", [:mix], [{:castore, "~> 1.0", [hex: :castore, repo: "hexpm", optional: true]}, {:jason, "~> 1.0", [hex: :jason, repo: "hexpm", optional: false]}], "hexpm", "523fe8a15603f86d64852aab2abe8ddbd78e68579c8525ae765facc5eae01562"},
   "jason": {:hex, :jason, "1.4.4", "b9226785a9aa77b6857ca22832cffa5d5011a667207eb2a0ad56adb5db443b8a", [:mix], [{:decimal, "~> 1.0 or ~> 2.0", [hex: :decimal, repo: "hexpm", optional: true]}], "hexpm", "c5eb0cab91f094599f94d55bc63409236a8ec69a21a67814529e8d5f6cc90b3b"},
-  "minipeg": {:hex, :minipeg, "0.7.0", "232d6762560357433e8e4556d9e9d38459ccef80ed13e64e8784ccb8b08a7e0c", [:mix], [], "hexpm", "d9509eab735a410463141d2b9a9713374b4f0d5c97d44cadb64f0a8f23924aaf"},
+  "minipeg": {:hex, :minipeg, "0.7.1", "623385d78eb559ecdff31359d0f7d2279b6cf2c71aeb81ac728fd63232438368", [:mix], [], "hexpm", "8f28c64643b4f67b0a38807d6aa82622856d0dbf5b64b850b18e13ef740cf2e9"},
 }

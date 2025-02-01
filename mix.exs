@@ -68,7 +68,7 @@ defmodule Awake.MixProject do
     [
       {:dialyxir, "~> 1.4.5", only: [:dev, :test], runtime: false},
       {:excoveralls, "~> 0.18.5", only: [:test]},
-      {:minipeg, "~> 0.7.0"},
+      {:minipeg, "~> 0.7.1"},
     ]
   end
 
