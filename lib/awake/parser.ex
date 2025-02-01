@@ -38,6 +38,11 @@ defmodule Awake.Parser do
       iex(5)> parse("hello %c and more%%")
       {:ok, [{:verb, "hello "}, {:field, "c"}, {:verb, " and more%"}]} 
 
+  fields are either predefined, or indices into fields
+
+      iex(6)> parse("%c%tms%2%-1 or %")
+      {:ok, [{:field, "c"}, {:field, "tms"}, {:field, 2}, {:field, -1}, {:verb, " or "}, {:field, 0}]}
+
   """
   @spec parse(binary()) :: Parser.result_tuple_t(ast_t())
   def parse(pattern) do

@@ -26,7 +26,8 @@ defmodule Awake.Grammar do
     )
   end
 
-  @defined_fieldnames ~W[ts xs now xms c]
+
+  @defined_fieldnames ~W[c now tms ts xs xms]
   @spec field_name_parser() :: t()
   defp field_name_parser do
     @defined_fieldnames
@@ -38,7 +39,10 @@ defmodule Awake.Grammar do
   defp field_parser do
     sequence([
       literal_parser("%"),
-      field_name_parser()
+      maybe(select([
+        field_name_parser(),
+        int_parser()
+      ]))
     ])
     |> map(&make_field/1) 
   end
@@ -55,7 +59,7 @@ defmodule Awake.Grammar do
 
   @spec make_field(binaries()) :: field_t()
   defp make_field(["%", name]) do
-    {:field, name}
+    {:field, name || 0}
   end
 
   @spec verbs_parser() :: t()
