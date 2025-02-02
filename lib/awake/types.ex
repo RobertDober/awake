@@ -4,10 +4,15 @@ defmodule Awake.Types do
     quote do
       @type ast_entry_t :: verb_t() | field_t() | function_t()
       @type ast_t :: list(ast_entry_t)
+      @type augmented_entry_t :: verb_t() | field_t() | function_t() | pipeline_t()
+      @type augmented_t :: list(augmented_entry_t)
 
       @type binaries :: list(binary())
+
       @type field_t :: {:field, binary() | integer()}
-      @type function_t :: {:fun, atom(), list()}
+      @type function_t :: {:func, list()}
+
+      @type pipeline_t :: {:pipe, atom(), list()}
       @type verb_t :: {:verb, binary()}
     end
   end

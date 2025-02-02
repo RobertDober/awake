@@ -1,7 +1,8 @@
 defmodule Awake do
   use Awake.Types
 
-  alias Awake.Compiler
+  alias Awake.{Compiler, Parser}
+
   @moduledoc ~S"""
   ## Synopsis
 
@@ -130,6 +131,11 @@ defmodule Awake do
   For a detailed description refer to the [doctests of the Compiler](awake.Compiler.html)
   """
 
+  @spec run(binary()) :: binaries()
+  def run(pattern) do
+    {:ok, ast} = Parser.parse(pattern)
+    instructions = Compiler.compile(ast)
+  end
 
 end
 # SPDX-License-Identifier: AGPL-3.0-or-later

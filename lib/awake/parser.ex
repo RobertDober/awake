@@ -74,6 +74,7 @@ defmodule Awake.Parser do
       iex(9)> parse("%(+ 1 2)(tos 16) %c(lpad 5 0)")
       {:ok, [{:field, 0}, {:func, [[:+, 1, 2],  [:tos, 16]]}, {:verb, " "}, {:field, "c"}, {:func, [[:lpad, 5, 0]]}]}
 
+
   """
   @spec parse(binary()) :: Parser.result_tuple_t(ast_t())
   def parse(pattern) do
