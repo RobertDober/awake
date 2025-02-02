@@ -44,15 +44,35 @@ defmodule Awake do
       %1 => like %, but for `fields[0]`
       %c => like %, but for `lnb`
 
-  However if a field (or a function) is followed by another function, then only the last
-  one will modify `output`.
+  This is oversimplifcation but probably more than enough you need to know
 
-  Therfore the compilation of the chunk 
+  ### Workflows
 
-      "%c(..." => push `lnb` onto `opstack`
-      "(+ 1)" =>  pop value from `opstack`, push result onto `opstack`, push result onto `output`
-                    (because we are the tail of the pipeline)
+  #### Immediate Execution
+  
+  If we want to compile and run we will do the following
 
+      ... | awake PATTERN_STRING  # prints to $stdout
+
+      PATTERN_STRING |> parse => AST |> compile => SYMBOLIC_CODE |> code_gen => FUNCTION_LIST |> execute
+
+  However it is a complete overkill to create SYMBOLIC_CODE in this case and we might optimize as follows (in future versions)
+
+      PATTERN_STRING |> parse => AST |>  code_gen_from_ast => FUNCTION_LIST |> execute
+
+  #### Compile Only
+  
+  If we use recurring patterns it might be a good idea to compile the pattern into a file
+
+     awake -c|--compile PATTERN > some_file
+
+      PATTERN_STRING |> parse => AST |> compile => SYMBOLIC_CODE |> write_to_stdout
+
+  #### Execute Symbolic code
+
+      ... | awake -f|--file somefile
+
+      read somefile => SYMBOLIC_CODE |> code_gen => FUNCTION_LIST |> execute
 
   ### Simple Patterns: Fields
 

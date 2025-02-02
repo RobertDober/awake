@@ -34,7 +34,7 @@ defmodule Awake.Grammar do
     literal_parser("()") |> ignore()
   end
 
-  @defined_fieldnames ~W[c now tm t x xm]
+  @defined_fieldnames ~W[c now tm t xm x]
   @spec field_name_parser() :: t()
   defp field_name_parser do
     @defined_fieldnames
