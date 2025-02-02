@@ -133,7 +133,7 @@ defmodule Awake do
 
   @spec run(binary()) :: binaries()
   def run(pattern) do
-    {:ok, ast} = Parser.parse(pattern)
+    ast = Parser.parse(pattern)
     instructions = Compiler.compile(ast)
   end
 

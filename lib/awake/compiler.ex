@@ -24,25 +24,28 @@ defmodule Awake.Compiler do
 
   """
 
+  @doc ~S"""
+
+  These doctests use the parser to generate the ast, so if you want to see
+  the AST that is passed into compile, please refer to [doctests of the Parser](awake.Parser.html)
+  or look at the [detailed tests](test/compiler)
+
+  A simple task first
+
+      iex(1)> comp("hello %%")
+      [ "pshouthello %" ]
+  
+  """
   @spec compile(ast_t()) :: binaries()
   def compile(ast) do
     ast
-    |> combine_chunks() 
     |> Enum.flat_map(&compile_chunk/1) 
   end
-
-  @spec combine_chunks(ast_t(), ast_t()) :: augmented_t()
-  defp combine_chunks(ast, result \\ [])
-  defp combine_chunks([], result), do: Enum.reverse(result)
-  defp combine_chunks([{:field, field}, {:func, args} | rest], result) do
-    combine_chunks(rest, [{:pipe, field, args}|result])
-  end
-  defp combine_chunks([h|t], result), do: combine_chunks(t, [h|result])
 
   @spec compile_chunk(ast_entry_t()) :: binaries()
   defp compile_chunk(chunk)
   defp compile_chunk({:verb, text}) do
-    [ "push2out#{text}" ]
+    [ "pshout#{text}" ]
   end
 end
 # SPDX-License-Identifier: AGPL-3.0-or-later
