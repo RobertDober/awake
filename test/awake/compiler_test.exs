@@ -15,6 +15,7 @@ defmodule Awake.CompilerTest do
   end
 
   def exec(functions, opts) do
+    opts = Keyword.put_new(opts, :line, "immaterial")
     functions
     |> Enum.reduce(State.new(opts), fn function, state -> function.(state) end)
   end

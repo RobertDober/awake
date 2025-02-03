@@ -45,24 +45,24 @@ defmodule Awake.Compiler do
 
   A pattern with only :verb chunks (not very useful but it still needs to work), is compiled to this
 
-  iex(1)> functions = comp("hello %%")
-  ...(1)> output(functions, line: "immaterial")
-  "hello %"
+      iex(1)> functions = comp("hello %%")
+      ...(1)> output(functions, line: "immaterial")
+      "hello %"
 
   An echo server, just in case you displaced `cat` (as we are lazy we have yet another helper, which compiles and outputs)
 
-  iex(2)> interpret("%", line: "halloooo")
-  "halloooo"
+      iex(2)> interpret("%", line: "halloooo")
+      "halloooo"
 
   Lets split lines (or hairs)
 
-  iex(3)> interpret("%1()%-1", line: "a b c")
-  "ac"
+      iex(3)> interpret("%1()%-1", line: "a b c")
+      "ac"
 
   Line numbers start at 0, but here we just stub it
 
-  iex(4)> interpret("%c: %", line: "43rd", lnb: 42)
-  "42: 43rd"
+      iex(4)> interpret("%c: %", line: "43rd", lnb: 42)
+      "42: 43rd"
 
   Now we have some interesting fields concerning timestamps
 
@@ -72,14 +72,14 @@ defmodule Awake.Compiler do
 
   Right now we support seconds and milliseconds in dec and hex format
 
-  iex(5)> interpret("%t %tm %x %xm", line: "", start_ts: 1738531696911270)
-  "1738531696 1738531696911 679fe370 194c890710f"
+      iex(5)> interpret("%t %tm %x %xm", line: "", start_ts: 1738531696911270)
+      "1738531696 1738531696911 679fe370 194c890710f"
 
   If we want to use a timestamp which advances for each input line we need to
   use the same fields as above but with a "c" (for current) prefixed
 
-  iex(6)> interpret("%ct %ctm %cx %cxm", line: "", current_ts: 1738531696911270)
-  "1738531696 1738531696911 679fe370 194c890710f"
+      iex(6)> interpret("%ct %ctm %cx %cxm", line: "", current_ts: 1738531696911270)
+      "1738531696 1738531696911 679fe370 194c890710f"
 
   As one can see from the stubbing of `start_ts:` and `current_ts:` above, we
   must rely on the runtime to set these correctly in the state
@@ -93,9 +93,9 @@ defmodule Awake.Compiler do
 
   However, standalone pipelines are not supported yet
 
-  iex(7)> assert_raise Awake.Exceptions.CompilationError,
-  ...(7)>     "pure function pipelines (without a preceeding field) are not supported yet!",
-  ...(7)>     fn -> interpret("(+ 1 2)", line: "") end
+      iex(7)> assert_raise Awake.Exceptions.CompilationError,
+      ...(7)>     "pure function pipelines (without a preceeding field) are not supported yet!",
+      ...(7)>     fn -> interpret("(+ 1 2)", line: "") end
 
   That now out of the way let us concentrate on pipelines,
 
@@ -104,10 +104,31 @@ defmodule Awake.Compiler do
   When we talk about string formatting we have to keep in mind that, as inspired by _awk_ we are
   treating numbers as strings if dictated by the context, this is the case here
 
-  iex(8)> interpret("%c(lpad 3)", lnb: 73, line: "immaterial")
-  " 73"
+      iex(8)> interpret("%c(lpad 3)", lnb: 73)
+      " 73"
+
+      iex(9)> interpret("%c(lpad 4 0)", lnb: 144)
+      "0144"
+
+
+      iex(10)> interpret("%c(rpad 3)", lnb: 73)
+      "73 "
+
+      iex(11)> interpret("%c(rpad 4 'x')", lnb: 144)
+      "144x"
+
+  ### Artithmetics
+  
+  Just what you'd expect, again type conversion is done as needed
+
+      iex(12)> interpret("%2(+ 1)", line: "a 42")
+      "43"
+
+      iex(13)> interpret("%c(* 2)(- 1)", lnb: 10)
+      "19"
 
   """
+
   @spec compile(ast_t()) :: binaries()
   def compile(ast) do
     ast
