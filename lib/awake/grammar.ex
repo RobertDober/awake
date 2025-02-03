@@ -5,6 +5,12 @@ defmodule Awake.Grammar do
   @moduledoc false
 
   @typep t :: Minipeg.Parser.t()
+
+  @defined_fieldnames ~W[
+    ctm ct cxm cx
+    tm t xm x 
+    c]
+
   @spec pattern() :: t()
   def pattern do
     sequence([
@@ -34,7 +40,6 @@ defmodule Awake.Grammar do
     literal_parser("()") |> ignore()
   end
 
-  @defined_fieldnames ~W[c now tm t xm x]
   @spec field_name_parser() :: t()
   defp field_name_parser do
     @defined_fieldnames

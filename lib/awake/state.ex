@@ -4,8 +4,21 @@ defmodule Awake.State do
   Implements the state of the runtime during execution of the compiled functions
   """
 
-  defstruct line: "", lnb: 0, fields: [], now: nil, opstack: [], output: [] 
-  @type t :: %__MODULE__{line: binary(), lnb: non_neg_integer(), fields: binaries(), now: integer(), opstack: list(), output: list()}
+  defstruct line: "",
+  lnb: 0,
+    fields: [],
+    current_ts: nil,
+    start_ts: nil,
+    opstack: [],
+    output: []
+
+  @type t :: %__MODULE__{line: binary(),
+    lnb: non_neg_integer(),
+    fields: binaries(),
+    current_ts: integer(),
+    start_ts: integer(),
+    opstack: list(),
+    output: list()}
 
   @spec new(Keyword.t()) :: t()
   def new(options) do
@@ -14,7 +27,8 @@ defmodule Awake.State do
       line:  line,
       fields: String.split(line),
       lnb: Keyword.get(options, :lnb, 0),
-      now: Keyword.get(options, :now, System.os_time(:microsecond)),
+      current_ts: Keyword.get(options, :current_ts, System.os_time(:microsecond)),
+      start_ts: Keyword.get(options, :start_ts, System.os_time(:microsecond)),
     }
   end
 
@@ -28,7 +42,8 @@ defmodule Awake.State do
       line: line,
       lnb: Keyword.get(options, :lnb, myself.lnb),
       fields: fields,
-      now: Keyword.get(options, :now, myself.now),
+      current_ts: Keyword.get(options, :current_ts, myself.current_ts),
+      start_ts: Keyword.get(options, :start_ts, myself.start_ts),
       opstack: replace_or_push(myself.opstack, Keyword.get(options, :opstack, myself.opstack)),
       output: replace_or_push(myself.output, Keyword.get(options, :output, myself.output)),
     }
