@@ -20,6 +20,8 @@ defmodule Awake.State do
     opstack: list(),
     output: list()}
 
+  @type fun_t :: (t() -> t())
+
   @spec new(Keyword.t()) :: t()
   def new(options) do
     line = Keyword.fetch!(options, :line)

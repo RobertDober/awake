@@ -127,6 +127,24 @@ defmodule Awake.Compiler do
       iex(13)> interpret("%c(* 2)(- 1)", lnb: 10)
       "19"
 
+  In Elixir parler `/` is `div` and `%` is rem
+
+      iex(14)> interpret("%c(% 100)(/ 5)", lnb: 246)
+      "9"
+
+  ### Stack operations
+
+  Up to now, the value of a field (or pipeline) is lost once
+  it is pushed to the output. Therefore, if we would like to add two fields together
+  it cannot be done.
+
+  In order to achieve this two builtin _stack manipulation_ functions
+
+  #### `d` for _duplicate_
+
+      iex(15)> interpret("%1(d) %2(d) (+)", line: "12 30")
+      "12 30 42"
+
   """
 
   @spec compile(ast_t()) :: binaries()
@@ -182,7 +200,10 @@ defmodule Awake.Compiler do
   @spec compile_s_expression(list()) :: list(function())
   defp compile_s_expression([id|args]) do
     fun =  Builtins.fetch(id)
-    [&P.call_fun_with_opstack(&1, fun, args)]
+    case fun do
+      f when is_function(f) -> [&P.call_fun_with_opstack(&1, f, args)]
+      %Functions{fun: f} -> [&P.call_fun_with_state(&1, f, args)]
+    end
   end
 end
 # SPDX-License-Identifier: AGPL-3.0-or-later

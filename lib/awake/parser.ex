@@ -75,6 +75,11 @@ defmodule Awake.Parser do
       iex(9)> parse("%(+ 1 2)(tos 16) %c(lpad 5 0)")
       [{:pipe, 0,  [[:+, 1, 2],  [:tos, 16]]}, {:verb, " "}, {:pipe, "c",  [[:lpad, 5, 0]]}]
 
+  N.B. that inside a function `%` is just `%`
+
+      iex(10)> parse("%(% 2)")
+      [{:pipe, 0,  [[:%, 2]]}]
+
   """
   @spec parse(binary()) :: augmented_t()
   def parse(pattern) do
