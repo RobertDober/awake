@@ -15,15 +15,6 @@ defmodule Awake.Primitives do
     [Map.fetch!(builtin_fields(), name)]
   end
 
-  @spec call_fun_with_opstack(State.t, function(), list()) :: State.t
-  def call_fun_with_opstack(%State{opstack: opstack}=state, fun, args) do
-    actual_args = opstack ++ args
-    case fun.(actual_args) do
-      result when is_list(result) -> State.update(state, opstack: result)
-      result  -> State.update(state, opstack: [result])
-    end
-  end
-
   @spec curr_dec_secs_to_opstack(State.t) :: State.t
   def curr_dec_secs_to_opstack(%State{current_ts: current_ts, opstack: opstack}=state) do
     %{state | opstack: [div(current_ts, 1_000_000)|opstack]}
@@ -124,6 +115,13 @@ defmodule Awake.Primitives do
     %{state | output: [Enum.at(fields, index)|output]}
   end
 
+  @spec invoke_fun(State.t, function(), list(), non_neg_integer(), binary()) :: State.t
+  def invoke_fun(%State{opstack: opstack}=state, fun, args, required, name) do
+    actual_args = Enum.take(opstack, required) ++ args
+    result =  fun.(actual_args)
+    IO.inspect( %{state | opstack: [result | Enum.drop(opstack, required)], name: name}, label: :fun )
+  end
+
   @spec lnb_to_output(State.t) :: State.t
   def lnb_to_output(%State{lnb: lnb, output: output}=state) do
     %{state | output: [lnb|output]}
@@ -133,12 +131,11 @@ defmodule Awake.Primitives do
   def line_to_output(%State{line: line, output: output}=state) do
     %{state | output: [line|output]}
   end
- 
-  @spec opstack_to_output(State.t) :: State.t
-  def opstack_to_output(state) do
-    State.update(state,
-      opstack: [],
-      output: state.opstack ++ state.output)
+
+  @spec pop_opstack_to_out(State.t) :: State.t
+  def pop_opstack_to_out(%State{opstack: [h|t], output: output}=state) do
+    IO.inspect(state, label: :before)
+    IO.inspect(%{state|opstack: t, output: [h|output]},label: :after)
   end
 
   @spec string_to_output(State.t(), binary()) :: State.t()

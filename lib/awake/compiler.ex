@@ -5,6 +5,7 @@ defmodule Awake.Compiler do
   alias Awake.Builtins
   alias Awake.Primitives, as: P
 
+  @type compiled_chunk_t :: list(function())
   @moduledoc ~S"""
   Compiling the AST into a sequence of primitive operations.
 
@@ -88,48 +89,37 @@ defmodule Awake.Compiler do
 
   Now let us do some calculations, fianlly!
 
-  If a field is followed by a list of s-expressions, it is parsed to a function pipeline as
-  can be seen in the [Parser docs](Awake.Parser.html#parse/1-function-pipelines)
-
-  However, standalone pipelines are not supported yet
-
-      iex(7)> assert_raise Awake.Exceptions.CompilationError,
-      ...(7)>     "pure function pipelines (without a preceeding field) are not supported yet!",
-      ...(7)>     fn -> interpret("(+ 1 2)", line: "") end
-
-  That now out of the way let us concentrate on pipelines,
-
   ### String formatting
 
   When we talk about string formatting we have to keep in mind that, as inspired by _awk_ we are
   treating numbers as strings if dictated by the context, this is the case here
 
-      iex(8)> interpret("%c(lpad 3)", lnb: 73)
+      iex(7)> interpret("%c(lpad 3)", lnb: 73)
       " 73"
 
-      iex(9)> interpret("%c(lpad 4 0)", lnb: 144)
+      iex(8)> interpret("%c(lpad 4 0)", lnb: 144)
       "0144"
 
 
-      iex(10)> interpret("%c(rpad 3)", lnb: 73)
+      iex(9)> interpret("%c(rpad 3)", lnb: 73)
       "73 "
 
-      iex(11)> interpret("%c(rpad 4 'x')", lnb: 144)
+      iex(10)> interpret("%c(rpad 4 'x')", lnb: 144)
       "144x"
 
   ### Artithmetics
   
   Just what you'd expect, again type conversion is done as needed
 
-      iex(12)> interpret("%2(+ 1)", line: "a 42")
+      iex(11)> interpret("%2(+ 1)", line: "a 42")
       "43"
 
-      iex(13)> interpret("%c(* 2)(- 1)", lnb: 10)
+      iex(12)> interpret("%c(* 2)(- 1)", lnb: 10)
       "19"
 
   In Elixir parler `/` is `div` and `%` is rem
 
-      iex(14)> interpret("%c(% 100)(/ 5)", lnb: 246)
+      iex(13)> interpret("%c(% 100)(/ 5)", lnb: 246)
       "9"
 
   ### Stack operations
@@ -142,7 +132,7 @@ defmodule Awake.Compiler do
 
   #### `d` for _duplicate_
 
-      iex(15)> interpret("%1(d) %2(d) (+)", line: "12 30")
+      iex(14)> interpret("%1(d) %2(d) (+)", line: "12 30")
       "12 30 42"
 
   """
@@ -153,7 +143,7 @@ defmodule Awake.Compiler do
     |> Enum.flat_map(&compile_chunk/1) 
   end
 
-  @spec compile_chunk(ast_entry_t(), Keyword.t) :: list(function()) 
+  @spec compile_chunk(ast_entry_t(), Keyword.t) :: compiled_chunk_t() 
   defp compile_chunk(chunk, options \\ [])
   defp compile_chunk({:verb, text}, _) do
     [&P.string_to_output(&1, text)]
@@ -182,28 +172,41 @@ defmodule Awake.Compiler do
   defp compile_chunk({:field, name}, options) do
     P.builtin_field(name, options)
   end
-  defp compile_chunk({:func, _}, _) do
-    raise CompilationError, "pure function pipelines (without a preceeding field) are not supported yet!"
+  defp compile_chunk({:func, s_expressions}, _) do
+    compile_pipeline(s_expressions) ++ [&P.pop_opstack_to_out/1]
   end
   defp compile_chunk({:pipe, name, s_expressions}, _) do
     header = compile_chunk({:field, name}, to_opstack: true)
-    footer = [&P.opstack_to_output/1]
+    footer = [&P.pop_opstack_to_out/1]
     header ++ compile_pipeline(s_expressions) ++ footer
   end
 
-  @spec compile_pipeline(list()) :: list(function())
+  @spec compile_invocation(map(), list(), non_neg_integer(), atom()) :: compiled_chunk_t()
+  defp compile_invocation(%{needs: needs, allows: allows, pulls: pulls, fun: fun}, args, count, name) do
+    if count + pulls > allows do
+      raise CompilationError, "too many arguments in compilation of builtin: #{name}"
+    end
+    required = max(needs - count, pulls)
+    [&P.invoke_fun(&1, fun, args, required, name)]
+  end
+
+  @spec compile_pipeline(list()) :: compiled_chunk_t()
   defp compile_pipeline(s_expressions) do
     s_expressions
     |> Enum.flat_map(&compile_s_expression/1) 
   end
 
-  @spec compile_s_expression(list()) :: list(function())
+  @spec compile_s_expression(list()) :: compiled_chunk_t()
   defp compile_s_expression([id|args]) do
-    fun =  Builtins.fetch(id)
-    case fun do
-      f when is_function(f) -> [&P.call_fun_with_opstack(&1, f, args)]
-      %Functions{fun: f} -> [&P.call_fun_with_state(&1, f, args)]
+    case Builtins.fetch(id) do
+      %{needs: 0, allows: 0, fun: fun} -> compile_state_function_call(fun, id)
+      fun_spec -> compile_invocation(fun_spec, args, Enum.count(args), id)
     end
+  end
+
+  @spec compile_state_function_call((State.t -> State.t), atom()) :: compiled_chunk_t()
+  defp compile_state_function_call(fun, name) do
+    [fn state -> %{fun.(state)|name: name} end]
   end
 end
 # SPDX-License-Identifier: AGPL-3.0-or-later
