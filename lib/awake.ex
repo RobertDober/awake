@@ -1,7 +1,7 @@
 defmodule Awake do
   use Awake.Types
 
-  alias Awake.{Compiler, Parser}
+  # alias Awake.{Compiler, Parser}
 
   @moduledoc ~S"""
   ## Synopsis
@@ -26,7 +26,7 @@ defmodule Awake do
                 - the, chomped, line (`line`)
                 - all whitespace seperated fields of the line (`fields`) à la _awk_
                 - the number of the input line, starting with 0 (`lnb`)
-  
+
             LOOP2: for each chunk
                 - call the compiled chunk (it is responsible to update the state)
                 - goto LOOP1 if the result of the call above equals `:abort`
@@ -49,7 +49,7 @@ defmodule Awake do
   ### Workflows
 
   #### Immediate Execution
-  
+
   If we want to compile and run we will do the following
 
       ... | awake PATTERN_STRING  # prints to $stdout
@@ -61,7 +61,7 @@ defmodule Awake do
       PATTERN_STRING |> parse => AST |>  code_gen_from_ast => FUNCTION_LIST |> execute
 
   #### Compile Only
-  
+
   If we use recurring patterns it might be a good idea to compile the pattern into a file
 
      awake -c|--compile PATTERN > some_file
@@ -102,14 +102,14 @@ defmodule Awake do
 
   ```elixir
       "%ts hello %%"
-  ```
+      ```
 
   becomes
 
   ```elixir
       [{:field, "ts"], {:verb "hello"}, # N.B. the first space is missing
        {:verb, "%"}]
-  ```
+       ```
 
   For a detailed description refer to the [doctests of the Parser](awake.Parser.html)
 
@@ -121,7 +121,7 @@ defmodule Awake do
 
   ```elixir
         {:verb, "some_text"}
-  ```
+        ```
 
   becomes
 
@@ -129,12 +129,12 @@ defmodule Awake do
       fn state ->
         %{state | output: [state.output, "some_text"]}
       end
-    ```
+      ```
 
   while the more complex
   ```elixir
         [{:field, 1}, {:fun, "+", [1]}]
-  ```
+        ```
 
   becomes something like
 
@@ -152,9 +152,11 @@ defmodule Awake do
   """
 
   @spec run(binary()) :: binaries()
-  def run(pattern) do
-    ast = Parser.parse(pattern)
-    instructions = Compiler.compile(ast)
+  def run(_pattern) do
+    # ast = Parser.parse(pattern)
+    # Compiler.compile(ast)
+    # instructions = Compiler.compile(ast)
+    []
   end
 
 end

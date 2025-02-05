@@ -1,15 +1,12 @@
 defmodule Awake.Grammar do
   use Awake.Types
-  import Minipeg.{Combinators, Mappers, Parsers}
+
+  # import Minipeg.{Combinators, Mappers, Parsers}
+  import Minipeg.{Combinators, Parsers}
   import Minipeg.Parsers.LispyParser, only: [s_exp_parser: 0]
   @moduledoc false
 
   @typep t :: Minipeg.Parser.t()
-
-  @defined_fieldnames ~W[
-    ctm ct cxm cx
-    tm t xm x 
-    c]
 
   @spec pattern() :: t()
   def pattern do
@@ -42,7 +39,7 @@ defmodule Awake.Grammar do
 
   @spec field_name_parser() :: t()
   defp field_name_parser do
-    @defined_fieldnames
+    Awake.Primitives.defined_field_names
     |> Enum.map(&literal_parser(&1))
     |> select()
   end

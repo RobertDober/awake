@@ -3,7 +3,6 @@ defmodule Awake.Parser do
 
   alias Minipeg.Parser
   alias Awake.Grammar
-  import Minipeg.{Combinators, Mappers, Parsers}
 
   @moduledoc ~S"""
   Parse a pattern into an AST
