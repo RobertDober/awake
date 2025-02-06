@@ -1,4 +1,4 @@
-defmodule Awake.Primitives.Function do
+dnefmodule Awake.Primitives.Function do
   use Awake.Types
   @moduledoc ~S"""
   Function wrapper around predefined functions

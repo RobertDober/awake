@@ -12,13 +12,13 @@ defmodule Awake.BcCompiler.Implementation do
 
   @spec compile_chunk(ast_entry_t()) :: symbolic_code()
   defp compile_chunk(chunk)
-  defp compile_chunk({:verb, content}), do: [{:strtoout, content}]
+  defp compile_chunk({:verb, content}), do: [{:verb, content}]
   defp compile_chunk({:field, number}) when is_integer(number) do
-    [{:fieldout, number}]
+    [{:field, number}]
   end
   defp compile_chunk({:field, primitive}) when is_binary(primitive) do
     [
-      get_primitive_name(primitive, "out")
+      get_primitive_name(primitive)
     ]
   end
   defp compile_chunk({:field, whatever}) do
@@ -26,12 +26,12 @@ defmodule Awake.BcCompiler.Implementation do
   end
   defp compile_chunk({:pipe, number, s_expressions}) when is_integer(number) do
     [
-      {:fieldstk, number} | compile_s_expressions(s_expressions)
+      {:field, number} | compile_s_expressions(s_expressions)
     ]
   end
   defp compile_chunk({:pipe, name, s_expressions}) when is_binary(name) do
     [
-      get_primitive_name(name, "stk") | compile_s_expressions(s_expressions)
+      get_primitive_name(name) | compile_s_expressions(s_expressions)
     ]
   end
   defp compile_chunk({:pipe, whatever, _}) do
@@ -45,9 +45,7 @@ defmodule Awake.BcCompiler.Implementation do
       raise CompilationError, "function #{name} allows only #{allows} args, but #{provided} were given and #{pulls} will be injected at runtime"
     end
     arity = max(needs,provided + pulls)
-    (args |> Enum.map(&{:pushtostk, &1})) ++ [{:invkstk, arity, name}]
-
-    
+    (args |> Enum.map(&{:push, &1})) ++ [{:invoke, arity, name}]
   end
 
   @spec compile_s_expressions(list(list())) :: symbolic_code()
@@ -67,11 +65,11 @@ defmodule Awake.BcCompiler.Implementation do
     end
   end
 
-  @spec get_primitive_name(atom()|binary(), binary()) :: symbolic_instruction()
-  defp get_primitive_name(symbol, which_stack) do
+  @spec get_primitive_name(atom()|binary()) :: symbolic_instruction()
+  defp get_primitive_name(symbol) do
     name_of_primitive = Primitives.get_field_name(symbol)
     if name_of_primitive do
-      {"#{name_of_primitive}to#{which_stack}" |> String.to_atom }
+      {name_of_primitive}
     else
       raise CompilationError, "#{symbol} is not a defined primitive field"
     end

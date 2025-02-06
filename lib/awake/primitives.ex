@@ -7,19 +7,23 @@ defmodule Awake.Primitives do
   """
 
   @primitive_field_names [
-    ctm: "ctm",
-    ct:  "cts",
-    cxm: "cxm",
-    cx:  "cxs",
-    tm:  "stm",
-    t:   "sts",
-    xm:  "sxm",
-    x:   "sxs",
-    c:   "lnb"
+    ctm: :ctm,
+    ct:  :cts,
+    cxm: :cxm,
+    cx:  :cxs,
+    tm:  :stm,
+    t:   :sts,
+    xm:  :sxm,
+    x:   :sxs,
+    c:   :lnb
   ]
 
   @primitive_functions [
-    +: Function.new(&Function.aplus/2, name: :+), 
+    +: Function.new(&Functions.aplus/2, name: :+), 
+    *: Function.new(&Functions.amult/2, name: :*), 
+    -: Function.new(&Functions.aminus/2, name: :-), 
+    /: Function.new(&Functions.adiv/2, name: :/), 
+    %: Function.new(&Functions.amod/2, name: :%), 
   ]
 
   @spec defined_field_names() :: binaries()
