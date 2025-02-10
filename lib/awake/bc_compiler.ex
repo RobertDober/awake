@@ -95,6 +95,21 @@ defmodule Awake.BcCompiler do
       {:invoke, 2, :+}, # 2 is the arity
       ]
 
+  ### Some special functions
+  
+      iex(7)> comp("%3(+ 1)(d) (+ 2)")
+      [
+      {:field, 3},
+      {:push, 1},
+      {:invoke, 2, :+},
+      {:invoke, 0, :d}, # 0 means call function with state
+      {:verb, " "},
+      {:push, 2},
+      {:invoke, 2, :+},
+      ]
+
+
+
   """
 
   @spec compile(ast_t()) :: symbolic_code()

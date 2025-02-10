@@ -37,12 +37,23 @@ defmodule Awake.BcCompiler.Implementation do
   defp compile_chunk({:pipe, whatever, _}) do
     raise CompilationError, "cannot compile filed: #{inspect whatever} is not a number or a binary, at beginning of pipeline"
   end
+  defp compile_chunk({:func, s_expressions}) do
+    compile_s_expressions(s_expressions)
+  end
+
 
   @spec compile_invocation(Function.t, atom(), list()) :: symbolic_code()
-  defp compile_invocation(%Function{allows: allows, needs: needs, pulls: pulls}, name, args) do
+  defp compile_invocation(%Function{defaults: defaults, needs: needs, pulls: pulls}, name, args) do
     provided = Enum.count(args)
-    if provided + pulls > allows do
-      raise CompilationError, "function #{name} allows only #{allows} args, but #{provided} were given and #{pulls} will be injected at runtime"
+    if provided + pulls > needs do
+      raise CompilationError, "function #{name} allows only #{needs} args, but #{provided} were given and #{pulls} will be injected at runtime"
+    end
+    missing = needs - provided - pulls
+    args = args ++ Enum.take(defaults, missing)
+    new_provided = Enum.count(args)
+    missing = needs - new_provided - pulls
+    if missing > 0 do
+      raise CompilationError, "function #{name} needs #{needs} args, but #{new_provided} were given and only #{pulls} will be injected at runtime"
     end
     arity = max(needs,provided + pulls)
     (args |> Enum.map(&{:push, &1})) ++ [{:invoke, arity, name}]

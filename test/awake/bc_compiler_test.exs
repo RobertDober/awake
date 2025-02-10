@@ -31,6 +31,15 @@ defmodule Awake.BcCompilerTest do
         ]
     end
   end
+
+  describe "some arity checks" do
+    test "croaks if too many params are provided"  do
+      assert_raise CompilationError, fn ->
+        compile([{:pipe, :c, [[:+, 2, 3]]}])
+
+      end
+    end
+  end
 end
 # SPDX-License-Identifier: AGPL-3.0-or-later
 

@@ -24,6 +24,10 @@ defmodule Awake.Primitives do
     -: Function.new(&Functions.aminus/2, name: :-), 
     /: Function.new(&Functions.adiv/2, name: :/), 
     %: Function.new(&Functions.amod/2, name: :%), 
+    d: Function.new(&Functions.duplicate/1, name: :duplicate, needs: 0, pulls: 0),
+    i: Function.new(&Functions.duplicate/1, name: :ignor , needs: 0, pulls: 0),
+    lpad: Function.new(&Functions.lpad/3, name: :lpad, needs: 3, defaults: [" "], pulls: 1),
+    rpad: Function.new(&Functions.rpad/3, name: :rpad, needs: 3, defaults: [" "], pulls: 1),
   ]
 
   @spec defined_field_names() :: binaries()
@@ -44,7 +48,7 @@ defmodule Awake.Primitives do
     |> Keyword.get(name) 
   end
 
-  @spec get_function(atom()) :: Function.t
+  @spec get_function(atom()) :: maybe(Function.t)
   def get_function(name) do
     @primitive_functions
     |> Keyword.get(name) 

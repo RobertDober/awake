@@ -41,5 +41,16 @@ defmodule Awake.State do
       start_ts: Keyword.get(options, :start_ts, System.os_time(:microsecond)),
     }
   end
+
+  @spec duplicate(t()) :: t()
+  def duplicate(%__MODULE__{opstack: [h|t]}=state) do
+    %{state|opstack: [h, h|t]}
+  end
+
+  @spec ignore(t()) :: t()
+  def ignore(%__MODULE__{}=state) do
+    %{state|ignore: true}
+  end
+
 end
 # SPDX-License-Identifier: AGPL-3.0-or-later

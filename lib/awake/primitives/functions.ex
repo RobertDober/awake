@@ -6,6 +6,7 @@ defmodule Awake.Primitives.Functions do
 
   @typep arg_t :: binary() | integer()
 
+  # Arithmetic
   @spec adiv(arg_t(), arg_t()) :: integer()
   def adiv(lhs, rhs), do: _assure_integer(lhs) + _assure_integer(rhs)
 
@@ -20,6 +21,21 @@ defmodule Awake.Primitives.Functions do
 
   @spec aplus(arg_t(), arg_t()) :: integer()
   def aplus(lhs, rhs), do: _assure_integer(lhs) + _assure_integer(rhs)
+
+  # String
+  @spec lpad(binary(), non_neg_integer(), binary()) :: binary()
+  def lpad(subject, size, filler \\ " ") do
+    "not yet implemented"
+  end
+
+  @spec rpad(binary(), non_neg_integer(), binary()) :: binary()
+  def rpad(subject, size, filler \\ " ") do
+    "not yet implemented"
+  end
+
+  # Internal
+  defdelegate duplicate(state), to: Awake.State
+  defdelegate ignore(state), to: Awake.State
 
   defp _assure_integer(subject)
   defp _assure_integer(subject) when is_integer(subject) do
