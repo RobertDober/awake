@@ -52,5 +52,22 @@ defmodule Awake.State do
     %{state|ignore: true}
   end
 
+  @spec push(t(), any()) :: t()
+  def push(%__MODULE__{opstack: stack}=state, value), do: %{state|opstack: [value|stack]}
+
+  @spec push_neg_field(t(), negative_integer()) :: t()
+  def push_neg_field(%__MODULE__{fields: fields, opstack: stack}=state, n) do
+    %{state|opstack: [Enum.at(fields, n)|stack]}
+  end
+
+  @spec push_pos_field(t(), positive_integer()) :: t()
+  def push_pos_field(%__MODULE__{fields: fields, opstack: stack}=state, n) do
+    %{state|opstack: [Enum.at(fields, n-1)|stack]}
+  end
+
+  @spec push_line(t()) :: t()
+  def push_line(%__MODULE__{line: line, opstack: stack}=state) do
+    %{state|opstack: [line|stack]}
+  end
 end
 # SPDX-License-Identifier: AGPL-3.0-or-later

@@ -37,6 +37,8 @@ defmodule Awake.Types do
 
       @type maybe(t) :: t | nil
 
+      @type name_t :: binary() | atom()
+
       @type pipeline_t :: {:pipe, atom(), list()}
 
       @typep scalar :: integer() | binary() | atom()

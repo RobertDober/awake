@@ -1,7 +1,7 @@
 defmodule Awake.Primitives.Function do
   use Awake.Types
   @moduledoc ~S"""
-  Function wrapper around predefined functions
+   Function wrapper around predefined functions
   """
 
   defstruct name: nil, fun: nil, needs: 2, defaults: [], pulls: 0
@@ -16,6 +16,15 @@ defmodule Awake.Primitives.Function do
       defaults: Keyword.get(opts, :defaults, []),
       needs: Keyword.get(opts, :needs, 2),
       pulls: Keyword.get(opts, :pulls, 1)
+    }
+  end
+
+  @spec field(function(), name_t()) :: t()
+  def field(fun, name) do
+    %__MODULE__{
+      name: name,
+      fun: fun,
+      needs: 0
     }
   end
 end

@@ -1,10 +1,19 @@
 defmodule Awake.Primitives.Functions do
   use Awake.Types
+  alias Awake.State
   @moduledoc ~S"""
   Implements primitive functions
   """
 
   @typep arg_t :: binary() | integer()
+
+  # Special
+
+  def _verb(verbatim) do
+    fn _ ->
+      verbatim
+    end
+  end
 
   # Arithmetic
   @spec adiv(arg_t(), arg_t()) :: integer()
