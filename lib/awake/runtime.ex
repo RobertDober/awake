@@ -16,7 +16,7 @@ defmodule Awake.Runtime do
   """
 
   @doc ~S"""
-  ## The simplest of them all
+  ## The simplest of them all: Verbatim Text
 
       iex(1)> crun("Hello World")
       "Hello World"
@@ -24,6 +24,20 @@ defmodule Awake.Runtime do
   
       iex(2)> crun("Hello()World")
       "HelloWorld"
+
+  ## Not very complicated: numeric fields
+  
+      iex(3)> crun("%2 % %-1", line: "  alpha beta gamma ")
+      "beta   alpha beta gamma  gamma"
+
+  ## Now just let's compute
+
+    `(d <n>)` duplicates the top of the stack `<n>` times
+    where `<n>` defaults to 1
+    and then we use the stack to add the two fields
+  
+      iex(4)> crun("%1(d) + %2(d) = (+)", line: "32 10")
+      "32 + 10 = 42"
 
   """
 

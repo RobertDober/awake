@@ -38,7 +38,7 @@ defmodule Awake.Primitives do
   ]
 
   @primitive_functions [
-    +: Function.new(&Functions.aplus/2, name: :+), 
+    +: Function.new(&Functions.aplus/3, name: :+), 
     *: Function.new(&Functions.amult/2, name: :*), 
     -: Function.new(&Functions.aminus/2, name: :-), 
     /: Function.new(&Functions.adiv/2, name: :/), 
@@ -56,7 +56,7 @@ defmodule Awake.Primitives do
     |> Enum.map(&to_string/1)
   end
 
-  @spec get_field_function(name_t()) :: t()
+  @spec get_field_function(name_t()) :: Function.t()
   def get_field_function(name)
   def get_field_function(name) when is_binary(name) do
     @primitive_field_functions

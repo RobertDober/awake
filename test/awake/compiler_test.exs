@@ -17,7 +17,7 @@ defmodule Awake.CompilerTest do
 
   describe "compilation errors" do
     test "field with bad type" do
-      assert_raise CompilationError, fn ->
+      assert_raise Awake.Exceptions.CompilationError, fn ->
         compile([{:field, :hello}])
       end
     end

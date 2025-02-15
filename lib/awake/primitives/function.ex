@@ -16,7 +16,7 @@ defmodule Awake.Primitives.Function do
       defaults: Keyword.get(opts, :defaults, []),
       needs: Keyword.get(opts, :needs, 2),
       pulls: Keyword.get(opts, :pulls, 1)
-    }
+    } 
   end
 
   @spec field(function(), name_t()) :: t()

@@ -52,15 +52,25 @@ defmodule Awake.State do
     %{state|ignore: true}
   end
 
-  @spec push(t(), any()) :: t()
-  def push(%__MODULE__{opstack: stack}=state, value), do: %{state|opstack: [value|stack]}
+  @spec pull_args(t(), non_neg_integer()) :: t()
+  def pull_args(%__MODULE__{opstack: stack}=state, missing) do
+    # TODO: Raise error if stack is too small
+    args = Enum.take(stack, missing)
+    {%{state|opstack: Enum.drop(stack, missing)}, args}
+  end
 
-  @spec push_neg_field(t(), negative_integer()) :: t()
+  @spec push(any(), t()) :: t()
+  def push(value, %__MODULE__{opstack: stack}=state), do: %{state|opstack: [value|stack]}
+
+  def push_field(%__MODULE__{}=state) do
+    push(state.line, state)
+  end
+  @spec push_neg_field(t(), neg_integer()) :: t()
   def push_neg_field(%__MODULE__{fields: fields, opstack: stack}=state, n) do
     %{state|opstack: [Enum.at(fields, n)|stack]}
   end
 
-  @spec push_pos_field(t(), positive_integer()) :: t()
+  @spec push_pos_field(t(), pos_integer()) :: t()
   def push_pos_field(%__MODULE__{fields: fields, opstack: stack}=state, n) do
     %{state|opstack: [Enum.at(fields, n-1)|stack]}
   end

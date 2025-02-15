@@ -10,6 +10,7 @@ defmodule Awake.Runtime.RuntimeImplementation do
 
   @spec run(any(), binary(), non_neg_integer()) :: binary?()
   def run(compiled, line, lnb) do
+    # IO.inspect(compiled 
     case compiled |> Enum.reduce_while(State.new(line: line, lnb: lnb), &apply_fun/2) do
       %State{ignore: true} -> nil
       %State{output: out} -> out |> Enum.reverse |> Enum.join
