@@ -1,8 +1,6 @@
 defmodule Awake.Parser do
   use Awake.Types
 
-  alias Minipeg.Parser
-  alias Awake.Grammar
 
   @moduledoc ~S"""
   Parse a pattern into an AST
@@ -16,7 +14,7 @@ defmodule Awake.Parser do
   If we want to print a fixed text for each line of input from stdin, we can use
   a verbatim pattern
 
-      iex(1)> parse("hello world")
+      iex(1)> parse("hello wokld")
       [{:verb, "hello world"}]
 
   but need to escape `%`
@@ -80,20 +78,28 @@ defmodule Awake.Parser do
       [{:pipe, 0,  [[:%, 2]]}]
 
   """
-  @spec parse(binary()) :: augmented_t()
-  def parse(pattern) do
-    with {:ok, ast} <- Parser.parse_string(Grammar.pattern, pattern) do
-      combine_chunks(ast)
-    end
+  @spec parse(binary()) :: ast_t()
+  def parse(pattern, ast \\ [])
+  def parse("", ast), do: Enum.reverse(ast)
+  def parse(input, ast) do
+    {rest, verb} = parse_verb(input)
+    parse(rest, [{:verb, verb}])
   end
 
-  @spec combine_chunks(ast_t(), ast_t()) :: augmented_t()
-  defp combine_chunks(ast, result \\ [])
-  defp combine_chunks([], result), do: Enum.reverse(result)
-  defp combine_chunks([{:field, field}, {:func, args} | rest], result) do
-    combine_chunks(rest, [{:pipe, field, args}|result])
+  @spec parse_verb(binary(), IO.chardata) :: parse_result(binary())
+  defp parse_verb(input, result \\ [])
+  defp parse_verb("%%" <> rest, result) do
+    parse_verb(rest, [result, "%"])
   end
-  defp combine_chunks([h|t], result), do: combine_chunks(t, [h|result])
-
+  defp parse_verb("((" <> rest, result) do
+    parse_verb(rest, [result, "("])
+  end
+  defp parse_verb(<< head::utf8, tail::binary >>, result) do
+    parse_verb(tail, [result, head])
+  end
+  defp parse_verb("", result) do
+    { "", result |> IO.chardata_to_string }
+  end
 end
+
 # SPDX-License-Identifier: AGPL-3.0-or-later
