@@ -39,6 +39,20 @@ defmodule Awake.Runtime do
       iex(4)> crun("%1(d) + %2(d) = (+)", line: "32 10")
       "32 + 10 = 42"
 
+    Here we see an example of why we might want to duplicate more than one
+    value, this also shows how things are popped of the stack, we also need
+    to understand that the `(d)` function will also pull off the top of the
+    stack to output, if we do not want this we can use `(i)` as demonstrated
+    below, therefore the following pattern will, when executed, do the
+    following things to the stack and output assuming the input being `"32 10"`
+    again:
+
+          "%1(d 2)..."    stack: [32, 32],         out: [32]
+          "%2(d 2)..."    stack: [10, 10, 32, 32]  out: [10, 32]
+          "( jjj
+
+
+
   """
 
   @spec run(any(), binary(), non_neg_integer()) :: binary?()

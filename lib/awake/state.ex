@@ -26,9 +26,6 @@ defmodule Awake.State do
 
   @type fun_t :: (t() -> t())
 
-  @spec ignore(t()) :: t()
-  def ignore(%__MODULE__{}=state), do: %{state|ignore: true}
-
   @spec new(Keyword.t()) :: t()
   def new(options) do
     line = Keyword.fetch!(options, :line)

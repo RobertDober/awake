@@ -1,12 +1,9 @@
 defmodule Awake.Runtime.RuntimeImplementation do
   use Awake.Types
 
-  alias Awake.Primitive.Functions
-  alias Awake.{Exceptions, State}
-  @moduledoc ~S"""
+  alias Awake.State
+  @moduledoc false
 
-
-  """
 
   @spec run(any(), binary(), non_neg_integer()) :: binary?()
   def run(compiled, line, lnb) do
@@ -28,17 +25,17 @@ defmodule Awake.Runtime.RuntimeImplementation do
     end
   end
 
-  defp call_fun_from_stack(fun, %State{opstack: stack}=state, arity) do
-    args = Enum.take(stack, arity)
-    stack = Enum.drop(stack, arity)
+  defp call_fun_from_stack(fun, %State{opstack: opstack}=state, arity) do
+    args = Enum.take(opstack, arity)
+    opstack = Enum.drop(opstack, arity)
     result = apply(fun, args)
-    %{state|stack: [result|stack]} 
+    %{state|opstack: [result|opstack]} 
   end
 
   defp invoke(fun, state) do
     case fun do
-      {0, f} -> fun.(state)
-      {arity, f} -> call_fun_from_stack(fun, state, arity)
+      {0, f} -> f.(state)
+      {arity, f} -> call_fun_from_stack(f, state, arity)
       fun -> fun.(state)
     end
   end
