@@ -1,6 +1,8 @@
 defmodule Awake.Parser do
   use Awake.Types
 
+  import __MODULE__.RgxParser
+  alias Awake.Exceptions.SyntaxError
 
   @moduledoc ~S"""
   Parse a pattern into an AST
@@ -14,7 +16,7 @@ defmodule Awake.Parser do
   If we want to print a fixed text for each line of input from stdin, we can use
   a verbatim pattern
 
-      iex(1)> parse("hello wokld")
+      iex(1)> parse("hello world")
       [{:verb, "hello world"}]
 
   but need to escape `%`
@@ -81,9 +83,45 @@ defmodule Awake.Parser do
   @spec parse(binary()) :: ast_t()
   def parse(pattern, ast \\ [])
   def parse("", ast), do: Enum.reverse(ast)
+  def parse("%%" <> rest, ast) do
+    {rest1, verb} = parse_verb(rest, "%") # |> IO.inspect() 
+    parse(rest1, [{:verb, verb}|ast])
+  end
+  def parse("((" <> rest, ast) do
+    {rest1, verb} = parse_verb(rest, "(")
+    parse(rest1, [{:verb, verb}|ast])
+  end
+  def parse("%" <> rest, ast) do
+    {rest1, fieldid} = parse_field(rest)
+    # IO.inspect(rest1, label: :rest1)
+    parse(rest1, [{:field, fieldid}|ast])
+  end
   def parse(input, ast) do
     {rest, verb} = parse_verb(input)
-    parse(rest, [{:verb, verb}])
+    parse(rest, [{:verb, verb}|ast])
+  end
+
+  @spec parse_field(binary()) :: parse_result(atom()|integer()) 
+  def parse_field(input)
+  def parse_field("") do
+    {"", 0}
+  end
+  def parse_field(" "<>rest) do
+    {rest, 0}
+  end
+  def parse_field(input) do
+    case parse_rgx(input, ~r/ \A ( [-+]? \d+ ) (.*) /x) do
+      {number, rest} -> {rest, String.to_integer(number)}
+      nil -> parse_field_name(input)
+    end
+  end
+
+  @spec parse_field_name(binary()) :: parse_result(atom())
+  def parse_field_name(input) do
+    case parse_rgx(input, ~r/ \A ( [-_\w!?]+ ) (.*) /x) do
+      {name, rest} -> {rest, String.to_atom(name)}
+      nil -> raise SyntaxError, "illegal field name at: #{input}"
+    end
   end
 
   @spec parse_verb(binary(), IO.chardata) :: parse_result(binary())
@@ -93,6 +131,12 @@ defmodule Awake.Parser do
   end
   defp parse_verb("((" <> rest, result) do
     parse_verb(rest, [result, "("])
+  end
+  defp parse_verb("%" <> rest, result) do
+    { "%" <> rest, result |> IO.chardata_to_string }
+  end
+  defp parse_verb("(" <> rest, result) do
+    { "(" <> rest, result |> IO.chardata_to_string }
   end
   defp parse_verb(<< head::utf8, tail::binary >>, result) do
     parse_verb(tail, [result, head])
