@@ -96,6 +96,10 @@ defmodule Awake.Parser do
     # IO.inspect(rest1, label: :rest1)
     parse(rest1, [{:field, fieldid}|ast])
   end
+  def parse("(" <> rest, ast) do
+    {rest1, s_exp} = parse_s_exp(rest)
+    parse(rest1, [{:s_exp, s_exp}|ast])
+  end
   def parse(input, ast) do
     {rest, verb} = parse_verb(input)
     parse(rest, [{:verb, verb}|ast])
@@ -110,7 +114,7 @@ defmodule Awake.Parser do
     {rest, 0}
   end
   def parse_field(input) do
-    case parse_rgx(input, ~r/ \A ( [-+]? \d+ ) (.*) /x) do
+    case parse_rgx(input, ~r/ \A ( [-+]? \d+ ) (\s?) (.*) /x) do
       {number, rest} -> {rest, String.to_integer(number)}
       nil -> parse_field_name(input)
     end
@@ -118,11 +122,26 @@ defmodule Awake.Parser do
 
   @spec parse_field_name(binary()) :: parse_result(atom())
   def parse_field_name(input) do
-    case parse_rgx(input, ~r/ \A ( [-_\w!?]+ ) (.*) /x) do
+    case parse_rgx(input, ~r/ \A ( [-_\w!?]+ ) (\s)? (.*) /x) do
       {name, rest} -> {rest, String.to_atom(name)}
       nil -> raise SyntaxError, "illegal field name at: #{input}"
     end
   end
+
+  @spec parse_s_exp(binary(), list()) ::  parse_result(ast_t())
+  defp parse_s_exp(input, ast \\ [])
+  defp parse_s_exp(")" <> rest, ast) do
+    {rest, Enum.reverse(ast)}
+  end
+  defp parse_s_exp(input, ast) do
+    case parse_s_exp_entry(input) do
+      {rest, entry} -> parse_s_exp(rest, [entry|ast])
+      message -> raise SyntaxError, "unexpected #{message} in s_expression"
+    end
+  end
+
+  @spec parse_s_exp_entry(binary()) :: parse_result(ast_t())
+  defp parse_s_exp_entry(input)
 
   @spec parse_verb(binary(), IO.chardata) :: parse_result(binary())
   defp parse_verb(input, result \\ [])

@@ -24,7 +24,7 @@ defmodule Awake.Types do
 
       # @type arity1_instruction :: :fieldout | :strtoout
       # @type arity2_instruction :: :invkstk
-      @type ast_entry_t :: verb_t() | field_t() | function_t()
+      @type ast_entry_t :: verb_t() | field_t() | function_t() | s_exp()
       @type ast_t :: list(ast_entry_t)
       # @type augmented_entry_t :: verb_t() | field_t() | function_t() | pipeline_t()
       # @type augmented_t :: list(augmented_entry_t)
@@ -43,6 +43,8 @@ defmodule Awake.Types do
       @type pipeline_t :: {:pipe, atom(), list()}
 
       @typep scalar :: integer() | binary() | atom()
+      @type s_exp :: {:s_exp, ast_t()}
+        
       # @typep symbolic_instruction :: 
       # {arity2_instruction(), scalar(), scalar()} |
       # {arity1_instruction(), scalar()} |

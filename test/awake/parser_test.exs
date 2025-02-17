@@ -22,6 +22,9 @@ defmodule AwakeTest.ParserTest do
     test "trailing space is ignored" do
       assert parse("% ") == [{:field, 0}]
     end
+    test "field at the end" do
+      assert parse(" %") == [{:verb, " "}, {:field, 0}]
+    end
     test "trailing space is ignored, but only one" do
       assert parse("%  ") == [{:field, 0}, {:verb, " "}]
     end
@@ -37,7 +40,21 @@ defmodule AwakeTest.ParserTest do
     end
     test "names and numbers" do
       assert parse("% %%%hello %3%-2") ==
-        [{:field, 0}, {:verb, "%"}, {:field, :hello}, {:verb, " "}, {:field, 3}, {:field, -2}]
+        [{:field, 0}, {:verb, "%"}, {:field, :hello}, {:field, 3}, {:field, -2}]
+    end
+    test "seperation of fields with spaces" do
+      assert parse("%1 hello%world again") ==
+        [{:field, 1}, {:verb, "hello"}, {:field, :world}, {:verb, "again"}]
+    end
+  end
+
+  describe "s-expressions" do
+    test "the null s-expression (use case: unclear)" do
+      assert parse("()") ==[{:s_exp, []}] 
+    end
+    test "zero arity-functions" do
+      assert parse("(+)(%)(mod)") ==
+        [{:s_exp, [:+]}, {:s_exp, [:%]}, {:s_exp, [:mod]}]
     end
   end
 end

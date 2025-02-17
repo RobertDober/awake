@@ -5,7 +5,7 @@ defmodule Awake.Parser.RgxParser do
   @spec parse_rgx(binary(), Regex.t) :: maybe({binary(), binary()})
   def parse_rgx(input, rgx) do
     case Regex.run(rgx, input) do
-      [_, h,  t] -> {h, t}
+      [_, h, _ignore, t] -> {h, t}
       _ -> nil
     end
   end
