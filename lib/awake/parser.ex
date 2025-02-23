@@ -1,8 +1,8 @@
 defmodule Awake.Parser do
   use Awake.Types
 
-  import __MODULE__.RgxParser
-  alias Awake.Exceptions.SyntaxError
+  alias Minipeg.Parser
+  alias Awake.Parser.Grammar
 
   @moduledoc ~S"""
   Parse a pattern into an AST
@@ -81,88 +81,9 @@ defmodule Awake.Parser do
 
   """
   @spec parse(binary()) :: ast_t()
-  def parse(pattern, ast \\ [])
-  def parse("", ast), do: Enum.reverse(ast)
-  def parse("%%" <> rest, ast) do
-    {rest1, verb} = parse_verb(rest, "%") # |> IO.inspect() 
-    parse(rest1, [{:verb, verb}|ast])
-  end
-  def parse("((" <> rest, ast) do
-    {rest1, verb} = parse_verb(rest, "(")
-    parse(rest1, [{:verb, verb}|ast])
-  end
-  def parse("%" <> rest, ast) do
-    {rest1, fieldid} = parse_field(rest)
-    # IO.inspect(rest1, label: :rest1)
-    parse(rest1, [{:field, fieldid}|ast])
-  end
-  def parse("(" <> rest, ast) do
-    {rest1, s_exp} = parse_s_exp(rest)
-    parse(rest1, [{:s_exp, s_exp}|ast])
-  end
-  def parse(input, ast) do
-    {rest, verb} = parse_verb(input)
-    parse(rest, [{:verb, verb}|ast])
+  def parse(pattern) do
+    with {:ok, ast} <- Parser.parse_string(Grammar.pattern, pattern), do: ast
   end
 
-  @spec parse_field(binary()) :: parse_result(atom()|integer()) 
-  def parse_field(input)
-  def parse_field("") do
-    {"", 0}
-  end
-  def parse_field(" "<>rest) do
-    {rest, 0}
-  end
-  def parse_field(input) do
-    case parse_rgx(input, ~r/ \A ( [-+]? \d+ ) (\s?) (.*) /x) do
-      {number, rest} -> {rest, String.to_integer(number)}
-      nil -> parse_field_name(input)
-    end
-  end
-
-  @spec parse_field_name(binary()) :: parse_result(atom())
-  def parse_field_name(input) do
-    case parse_rgx(input, ~r/ \A ( [-_\w!?]+ ) (\s)? (.*) /x) do
-      {name, rest} -> {rest, String.to_atom(name)}
-      nil -> raise SyntaxError, "illegal field name at: #{input}"
-    end
-  end
-
-  @spec parse_s_exp(binary(), list()) ::  parse_result(ast_t())
-  defp parse_s_exp(input, ast \\ [])
-  defp parse_s_exp(")" <> rest, ast) do
-    {rest, Enum.reverse(ast)}
-  end
-  defp parse_s_exp(input, ast) do
-    case parse_s_exp_entry(input) do
-      {rest, entry} -> parse_s_exp(rest, [entry|ast])
-      message -> raise SyntaxError, "unexpected #{message} in s_expression"
-    end
-  end
-
-  @spec parse_s_exp_entry(binary()) :: parse_result(ast_t())
-  defp parse_s_exp_entry(input)
-
-  @spec parse_verb(binary(), IO.chardata) :: parse_result(binary())
-  defp parse_verb(input, result \\ [])
-  defp parse_verb("%%" <> rest, result) do
-    parse_verb(rest, [result, "%"])
-  end
-  defp parse_verb("((" <> rest, result) do
-    parse_verb(rest, [result, "("])
-  end
-  defp parse_verb("%" <> rest, result) do
-    { "%" <> rest, result |> IO.chardata_to_string }
-  end
-  defp parse_verb("(" <> rest, result) do
-    { "(" <> rest, result |> IO.chardata_to_string }
-  end
-  defp parse_verb(<< head::utf8, tail::binary >>, result) do
-    parse_verb(tail, [result, head])
-  end
-  defp parse_verb("", result) do
-    { "", result |> IO.chardata_to_string }
-  end
 end
-
 # SPDX-License-Identifier: AGPL-3.0-or-later

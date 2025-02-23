@@ -24,10 +24,8 @@ defmodule Awake.Types do
 
       # @type arity1_instruction :: :fieldout | :strtoout
       # @type arity2_instruction :: :invkstk
-      @type ast_entry_t :: verb_t() | field_t() | function_t() | s_exp()
+      @type ast_entry_t :: verb_t() | field_t() | function_t()
       @type ast_t :: list(ast_entry_t)
-      # @type augmented_entry_t :: verb_t() | field_t() | function_t() | pipeline_t()
-      # @type augmented_t :: list(augmented_entry_t)
 
       @type binaries :: list(binary())
       @type binary? :: maybe(binary())

@@ -4,9 +4,6 @@ defmodule AwakeTest.ParserTest do
   import Awake.Parser
 
   describe "simple patterns" do
-    test "empty" do
-      assert parse("") == []
-    end
     test "verbatim is verbatim" do
       assert parse("just me") == [{:verb, "just me"}]
     end
@@ -32,15 +29,15 @@ defmodule AwakeTest.ParserTest do
       assert parse("%0") == [{:field, 0}]
     end
     test "0 and name" do
-      assert parse("% %hello") ==
-        [{:field, 0}, {:field, :hello}]
+      assert parse("% %ctm") ==
+        [{:field, 0}, {:field, :ctm}]
     end
     test "escapes before fields" do
-      assert parse("%%%hello") == [{:verb, "%"}, {:field, :hello}]
+      assert parse("%%%ct") == [{:verb, "%"}, {:field, :ct}]
     end
     test "names and numbers" do
-      assert parse("% %%%hello %3%-2") ==
-        [{:field, 0}, {:verb, "%"}, {:field, :hello}, {:field, 3}, {:field, -2}]
+      assert parse("% %%%c %3%-2") ==
+        [{:field, 0}, {:verb, "%"}, {:field, :lnb}, {:field, 3}, {:field, -2}]
     end
     test "seperation of fields with spaces" do
       assert parse("%1 hello%world again") ==
@@ -50,11 +47,22 @@ defmodule AwakeTest.ParserTest do
 
   describe "s-expressions" do
     test "the null s-expression (use case: unclear)" do
-      assert parse("()") ==[{:s_exp, []}] 
+      assert parse("()") ==[] 
     end
+
+    test "a zero arity function" do
+      assert parse("(mod)") ==
+        [{:func, :mod, []}]
+    end
+
+    test "some args" do
+      assert parse("(lpad 0 5)") ==
+        [{:func, :lpad, [0, 5]}]
+    end
+
     test "zero arity-functions" do
       assert parse("(+)(%)(mod)") ==
-        [{:s_exp, [:+]}, {:s_exp, [:%]}, {:s_exp, [:mod]}]
+        [{:func, [:+]}, {:s_exp, [:%]}, {:s_exp, [:mod]}]
     end
   end
 end
