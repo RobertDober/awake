@@ -49,7 +49,7 @@ defmodule Awake.Fields do
   #   rpad: Function.new(&Functions.rpad/3, name: :rpad, needs: 3, defaults: [" "], pulls: 1),
   # ]
 
-  @spec defined_fields() :: map()
+  @spec defined_fields() :: Keyword.t()
   def defined_fields do
     @primitive_field_names
   end

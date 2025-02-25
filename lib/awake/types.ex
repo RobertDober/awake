@@ -31,7 +31,7 @@ defmodule Awake.Types do
       @type binary? :: maybe(binary())
 
       @type field_t :: {:field, binary() | integer()}
-      @type function_t :: {:func, list()}
+      @type function_t :: {:func, binary(), list()}
 
       @type maybe(t) :: t | nil
 

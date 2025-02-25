@@ -32,20 +32,20 @@ defmodule AwakeTest.ParserTest do
       assert parse("% %ctm") ==
         [{:field, 0}, {:field, :ctm}]
     end
-    test "escapes before fields" do
-      assert parse("%%%ct") == [{:verb, "%"}, {:field, :ct}]
+    test "escapes before fields and normalisation of names" do
+      assert parse("%%%ct") == [{:verb, "%"}, {:field, :cts}]
     end
     test "names and numbers" do
       assert parse("% %%%c %3%-2") ==
         [{:field, 0}, {:verb, "%"}, {:field, :lnb}, {:field, 3}, {:field, -2}]
     end
-    test "seperation of fields with spaces" do
-      assert parse("%1 hello%world again") ==
-        [{:field, 1}, {:verb, "hello"}, {:field, :world}, {:verb, "again"}]
+    test "seperation of fields with spaces and normalisation of names" do
+      assert parse("%1 hello%tm again") ==
+        [{:field, 1}, {:verb, "hello"}, {:field, :stm}, {:verb, "again"}]
     end
   end
 
-  describe "s-expressions" do
+  describe "functions" do
     test "the null s-expression (use case: unclear)" do
       assert parse("()") ==[] 
     end
@@ -62,7 +62,19 @@ defmodule AwakeTest.ParserTest do
 
     test "zero arity-functions" do
       assert parse("(+)(%)(mod)") ==
-        [{:func, [:+]}, {:s_exp, [:%]}, {:s_exp, [:mod]}]
+        [{:func, :+, []}, {:func, :%, []}, {:func, :mod, []}]
+    end
+
+    test "args as fields" do
+      assert parse("(+ %c 1)") ==
+        [{:func, :+, [{:field, :c}, 1]}]
+    end
+
+    test "some complex stuff" do
+      result = parse("(lpad (+ %ctm (* 1000 %c)) 5 '')")
+      assert result == [
+        {:func, :lpad, [:+, [{:field, :ctm}, [:*, 1_000, {:field, :lnb}], 5, ""]]} 
+      ]
     end
   end
 end

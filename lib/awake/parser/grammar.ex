@@ -23,6 +23,7 @@ defmodule Awake.Parser.Grammar do
         "pattern parser",
         1),
       end_parser()])
+      # |> debug()
       |> map(&List.first/1)
   end
 
@@ -51,7 +52,8 @@ defmodule Awake.Parser.Grammar do
   defp field_lookup_parser(name) do
     name
     |> literal_parser()
-    |> map(fn [n] -> Awake.Fields.defined_fields |> Map.get(String.to_atom(n)) end)
+    # |> debug()
+    |> map(fn n -> Awake.Fields.defined_fields |> Keyword.get(String.to_atom(n)) end)
   end
 
   @spec field_parser() :: t()
@@ -64,13 +66,15 @@ defmodule Awake.Parser.Grammar do
       ])),
       maybe(literal_parser(" ")),
     ])
+    # |> debug()
     |> map(&make_field/1)
   end
 
   @spec function_parser() :: t()
   def function_parser do
-    many(customized_s_exp_parser("function parser", parsers: [field_parser()]), "function parser", 1)
-    |>map(&{:func, &1})
+    customized_s_exp_parser("function parser", element_parsers: [field_parser()])
+    |> debug() 
+    |>map(&make_func/1)
   end
 
   @spec join_verb_asts(list(verb_t())) :: verb_t()
@@ -86,6 +90,11 @@ defmodule Awake.Parser.Grammar do
   @spec make_field(binaries()) :: field_t()
   defp make_field(["%", name | _]) do
     {:field, name || 0}
+  end
+
+  @spec make_func(binaries()) :: function_t() 
+  defp make_func([name | args]) do
+    {:func, name, args}
   end
 
   @spec verbs_parser() :: t()
