@@ -40,6 +40,8 @@ defmodule Awake.Types do
       @type name_t :: binary() | atom()
 
       @type parse_result(t) :: {binary(), t}
+      @type parse_result?(t) :: maybe({binary(), t})
+      
       @type pipeline_t :: {:pipe, atom(), list()}
 
       @typep scalar :: integer() | binary() | atom()
