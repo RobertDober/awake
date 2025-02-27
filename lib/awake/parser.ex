@@ -16,35 +16,35 @@ defmodule Awake.Parser do
   If we want to print a fixed text for each line of input from stdin, we can use
   a verbatim pattern
 
-  iex(1)> parse("hello world")
-  [{:verb, "hello world"}]
+      iex(1)> parse("hello world")
+      [{:verb, "hello world"}]
 
   but need to escape `%`
 
-  iex(2)> parse("%%")
-  [{:verb, "%"}]
+      iex(2)> parse("%%")
+      [{:verb, "%"}]
 
   and also "("
 
-  iex(3)> parse("((")
-    [{:verb, "("}]
+      iex(3)> parse("((")
+      [{:verb, "("}]
 
   verbs are glued together
 
       iex(4)> parse("hello ((%%")
-        [{:verb, "hello (%"}]
+      [{:verb, "hello (%"}]
 
   ### Field chunks
 
   verbs are seperated by fields
 
-          iex(5)> parse("hello %c and more%%")
-          [{:verb, "hello "}, {:field, "c"}, {:verb, " and more%"}]
+      iex(5)> parse("hello %c  and more%%")
+      [{:verb, "hello "}, {:field, :c}, {:verb, " and more%"}]
 
   fields are either predefined, or indices into fields
 
-          iex(6)> parse("%c%tm%2%-1%t or %")
-          [{:field, "c"}, {:field, "tm"}, {:field, 2}, {:field, -1}, {:field, "t"},  {:verb, " or "}, {:field, 0}]
+      iex(6)> parse("%c%tm%2%-1%t or %")
+      [{:field, :c}, {:field, :tm}, {:field, 2}, {:field, -1}, {:field, :t},  {:verb, "or "}, {:field, 0}]
 
   ### Ambigous patterns
 
@@ -60,24 +60,40 @@ defmodule Awake.Parser do
   **N.B.** that we can get `[{:verb, "()"}]` easily enough from
   the input `"(()"` and also that it is not part of the ast.
 
-          iex(7)> parse("%()%")
-          [{:field, 0}, {:field, 0}]
+      iex(7)> parse("%()%")
+      [{:field, 0}, {:field, 0}]
 
-          iex(8)> parse("%t()s")
-          [{:field, "t"}, {:verb, "s"}]
+      iex(8)> parse("%t()s")
+      [{:field, :t}, {:verb, "s"}]
 
-  ### Function Pipelines
+  ### S-Expressions
 
   The syntax of function pipelines is simply a list of s-expressions, however
   the preceding field is integrated into the function ast tuple
 
-  iex(9)> parse("%(+ 1 2)(tos 16) %c(lpad 5 0)")
-  [{:pipe, 0,  [[:+, 1, 2],  [:tos, 16]]}, {:verb, " "}, {:pipe, "c",  [[:lpad, 5, 0]]}]
+      iex(9)> parse("%(+ 1 2)(tos 16) %c(lpad 5 0)")
+      [{:field, 0}, {:s_exp, :+, [1, 2]}, {:s_exp, :tos, [16]}, {:verb, " "}, {:field, :c}, {:s_exp, :lpad,  [5, 0]}]
 
-  N.B. that inside a function `%` is just `%`
+  N.B. that `%` as a function name is just `:%`
 
-  iex(10)> parse("%(% 2)")
-  [{:pipe, 0,  [[:%, 2]]}]
+      iex(10)> parse("%(% 2)")
+      [{:field, 0}, {:s_exp, :%, [2]}]
+
+  But as an argument it is a field
+
+      iex(11)> parse("(+ 1 %c)")
+      [{:s_exp, :+, [1, {:field, :c}]}]
+
+  #### Argument Types
+  
+      iex(12)> parse("(name 'a''string''' -42 (+ 1 2) an_atom ;)")
+      [{:s_exp, :name, ["a'string'", -42, {:s_exp, :+, [1, 2]}, :an_atom, :";"]}]
+
+  Double quotes for strings?
+
+      iex(13)> parse(~s{(lpad "hello" 50)})
+      [{:s_exp, :lpad, ["hello", 50]}]
+
 
   """
 
@@ -200,7 +216,7 @@ defmodule Awake.Parser do
 
   @spec parse_s_exp_args(binary(), list()) :: parse_result(ast_t())
   defp parse_s_exp_args(input, ast \\ [])
-  defp parse_s_exp_args("", _ast), do: raise(SyntaxError, "missing closing ) in s-expression")
+  defp parse_s_exp_args("", _ast), do: raise(SyntaxError, "unexpected end of input in s-expression")
   defp parse_s_exp_args(" " <> rest, ast), do: parse_s_exp_args(rest, ast)
   defp parse_s_exp_args(")" <> rest, ast), do: {rest, Enum.reverse(ast)}
   defp parse_s_exp_args(input, ast) do
@@ -210,6 +226,9 @@ defmodule Awake.Parser do
 
   @spec parse_s_exp_head(binary()) :: parse_result(atom())
   defp parse_s_exp_head(input)
+  defp parse_s_exp_head("") do
+    raise SyntaxError, "unexpected end of input in s-expression" 
+  end
   defp parse_s_exp_head(" "<>rest), do: parse_s_exp_head(rest)
   defp parse_s_exp_head(input) do
     cond do

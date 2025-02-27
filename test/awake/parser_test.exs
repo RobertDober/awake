@@ -1,6 +1,5 @@
 defmodule AwakeTest.ParserTest do
   use ExUnit.Case
-  # doctest Awake.Parser, import: true
   import Awake.Parser
 
   describe "simple patterns" do
