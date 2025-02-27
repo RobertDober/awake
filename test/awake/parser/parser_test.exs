@@ -1,4 +1,4 @@
-defmodule AwakeTest.ParserTest do
+defmodule AwakeTest.Parser.ParserTest do
   use ExUnit.Case
   import Awake.Parser
 
@@ -60,6 +60,9 @@ defmodule AwakeTest.ParserTest do
     test "zero arity-functions" do
       assert parse("(+)(%)(mod)") ==
         [{:s_exp, :+, []}, {:s_exp, :%, []}, {:s_exp, :mod, []}]
+    end
+    test "do not allow s-expressions at the function position" do
+      assert_raise(Awake.Exceptions.SyntaxError, fn -> parse("( (a) 42)") end)
     end
   end
 end

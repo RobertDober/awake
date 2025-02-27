@@ -1,4 +1,4 @@
-defmodule Test.Awake.ParserDocTest do
+defmodule Test.Awake.Parser.ParserDocTest do
   use ExUnit.Case
   doctest Awake.Parser, import: true
 end

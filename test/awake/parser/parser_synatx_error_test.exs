@@ -1,4 +1,4 @@
-defmodule Test.Awake.ParserSynatxErrorTest do
+defmodule Test.Awake.Parser.ParserSynatxErrorTest do
   use ExUnit.Case
   import Awake.Parser
 
