@@ -49,12 +49,21 @@ defmodule AwakeTest.ParserTest do
   end
 
   describe "s-expressions" do
-    test "the null s-expression (use case: unclear)" do
-      assert parse("()") ==[{:s_exp, []}] 
+    test "the null s-expression (use case: unclear, maybe just ignore in compilation and use as delimiter)" do
+      assert parse("()") ==[] 
+    end
+    test "zero arity function" do
+      assert parse("(%)") == [{:s_exp, :%, []}]
+    end
+    test "ws inside s-expressions is ignored" do
+      assert parse("( +  3)") == [{:s_exp, :+, [3]}]
     end
     test "zero arity-functions" do
       assert parse("(+)(%)(mod)") ==
-        [{:s_exp, [:+]}, {:s_exp, [:%]}, {:s_exp, [:mod]}]
+        [{:s_exp, :+, []}, {:s_exp, :%, []}, {:s_exp, :mod, []}]
+    end
+    test "do not allow s-expressions at the function position" do
+      assert_raise(Awake.Exceptions.SyntaxError, fn -> parse("( (a) 42)") end)
     end
   end
 end

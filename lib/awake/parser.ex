@@ -108,8 +108,10 @@ defmodule Awake.Parser do
     parse_pattern(rest1, [field|ast])
   end
   def parse_pattern("(" <> rest, ast) do
-    {rest1, s_exp} = parse_s_exp(rest)
-    parse_pattern(rest1, [{:s_exp, s_exp}|ast])
+    case parse_s_exp(rest) do
+      {rest1, {:s_exp, _, _ }=sexp} -> parse_pattern(rest1, [sexp|ast])
+      {rest2, nil} -> parse_pattern(rest2, ast)
+    end
   end
   def parse_pattern(input, ast) do
     {rest, verb} = parse_verb(input)
@@ -118,7 +120,7 @@ defmodule Awake.Parser do
 
   @spec maybe_parse_atom(binary()) :: parse_result?(atom())
   defp maybe_parse_atom(input) do
-    case parse_rgx(input, ~r/ \A [[:alnum:][:graph:]]+ (\s?) (.*) /x) do
+    case parse_rgx(input, ~r/ \A ([-\d\w+:\/;.?,_$*%<>@#&§!]+) (\s?) (.*) /x) do
       nil -> nil
       {atom, rest} -> {rest, String.to_atom(atom)}
     end
@@ -139,7 +141,7 @@ defmodule Awake.Parser do
     end
   end
 
-  @spec maybe_parse_s_exp(binary()) :: parse_result?(ast_t())
+  @spec maybe_parse_s_exp(binary()) :: parse_result?(s_exp())
   defp maybe_parse_s_exp(input)
   defp maybe_parse_s_exp("(" <> rest) do
     parse_s_exp(rest)
@@ -179,19 +181,45 @@ defmodule Awake.Parser do
     end
   end
 
-  @spec parse_s_exp(binary(), list()) ::  parse_result(ast_t())
-  defp parse_s_exp(input, ast \\ [])
-  defp parse_s_exp(")" <> rest, ast) do
-    {rest, Enum.reverse(ast)}
+  @spec parse_s_exp(binary()) :: parse_result(s_exp()|nil)
+  defp parse_s_exp(input)
+  defp parse_s_exp("(" <> _rest) do
+    # IO.inspect("( in function position", label: :parse_s_exp)
+    raise SyntaxError, "No s-expression allowed in the function position of an s-expression, yet"
   end
-  defp parse_s_exp(input, ast) do
-    case parse_s_exp_entry(input) do
-      {rest, entry} -> parse_s_exp(rest, [entry|ast])
-      # message -> raise SyntaxError, "unexpected #{message} in s_expression"
+  defp parse_s_exp(")" <> rest) do
+    # IO.inspect("empty s-exp", label: :parse_s_exp)
+    {rest, nil} 
+  end
+  defp parse_s_exp(input) do
+    # IO.inspect("input: #{inspect input}", label: :parse_s_exp)
+    {rest, head} = parse_s_exp_head(input)
+    {rest1, args} = parse_s_exp_args(rest)
+    {rest1, {:s_exp, head, args}}
+  end
+
+  @spec parse_s_exp_args(binary(), list()) :: parse_result(ast_t())
+  defp parse_s_exp_args(input, ast \\ [])
+  defp parse_s_exp_args("", _ast), do: raise(SyntaxError, "missing closing ) in s-expression")
+  defp parse_s_exp_args(" " <> rest, ast), do: parse_s_exp_args(rest, ast)
+  defp parse_s_exp_args(")" <> rest, ast), do: {rest, Enum.reverse(ast)}
+  defp parse_s_exp_args(input, ast) do
+    {rest, entry} = parse_s_exp_entry(input)
+    parse_s_exp_args(rest, [entry|ast])
+  end
+
+  @spec parse_s_exp_head(binary()) :: parse_result(atom())
+  defp parse_s_exp_head(input)
+  defp parse_s_exp_head(" "<>rest), do: parse_s_exp_head(rest)
+  defp parse_s_exp_head(input) do
+    cond do
+      result = maybe_parse_int(input) -> raise SyntaxError, "integer #{result} not allowed in function position"
+      result = maybe_parse_atom(input) -> result
+      true -> raise SyntaxError, "unexpected s_exp_entry #{input}"
     end
   end
 
-  @spec parse_s_exp_entry(binary()) :: parse_result(ast_t())
+  @spec parse_s_exp_entry(binary()) :: parse_result?(ast_entry_t())
   defp parse_s_exp_entry(input) do
     cond do
       result = maybe_parse_int(input) -> result
