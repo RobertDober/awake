@@ -1,9 +1,15 @@
 defmodule Awake.Compiler do
   use Awake.Types
-  alias Awake.Parser
+  alias Awake.{Opcode, Parser}
+
+  import Opcode
 
   @moduledoc ~S"""
   Compiling a pattern to virtual machine instructions
+
+  Virtual machine instructions are `Opcode` objects which are shown below
+  as their visual representation. When the runtime executes these instructions
+  it optimizes them by only extratcting the `fun` field from the `Opcode` objects.
 
   ## Simple patterns
 
@@ -28,7 +34,7 @@ defmodule Awake.Compiler do
 
       iex(4)> compile("%")
       [
-      {:outputfld, 0}
+      {:outputline}
       ]
 
       iex(5)> compile("%-2 %n ((")
@@ -57,7 +63,7 @@ defmodule Awake.Compiler do
 
       iex(8)> compile("%(+ %n (rnd 20))")
       [
-      {:outputfld, 0},
+      {:outputline},
       {:pushspc, :n},
       {:push, 20},
       {:invoke, :rnd, 1},
@@ -66,23 +72,30 @@ defmodule Awake.Compiler do
 
   """
 
-  @spec compile(binary()) :: list()
-  def compile(pattern) do
-    Parser.parse(pattern)
-    |> Enum.flat_map(&compile_chunk/1)
+  @spec compile(binary(), boolean()) :: list()
+  def compile(pattern, symbolic_only \\ true) do
+    chunks =  Parser.parse(pattern)
+      |> Enum.flat_map(&compile_chunk/1)
+    if symbolic_only do
+      chunks
+      |> Enum.map(&representation/1)
+    else
+      chunks
+      |> Enum.map(&Map.get(&1, :function))
+    end
   end
 
   @spec compile_arg(ast_entry_t()) :: list()
   defp compile_arg(arg)
 
   defp compile_arg({:field, n}) when is_number(n) do
-    [{:pushfld, n}]
+    makeary(:pushfld, n)
   end
   defp compile_arg({:field, name}) do
-    [{:pushspc, name}]
+    makeary(:pushspc, name)
   end
-  defp compile_arg({:s_exp, name, args}), do: compile_s_exp(name, args)
-  defp compile_arg(value), do: [{:push, value}]
+  defp compile_arg({:s_exp, name, args}), do: compile_s_exp(name, args, false)
+  defp compile_arg(value), do: makeary(:push, value)
 
   @spec compile_args(list()) :: list()
   defp compile_args(args) do
@@ -92,16 +105,22 @@ defmodule Awake.Compiler do
 
   @spec compile_chunk(ast_entry_t()) :: list()
   defp compile_chunk(ast)
-  defp compile_chunk({:verb, string}), do: [{:outputstr, string}]
+  defp compile_chunk({:verb, string}), do: makeary(:outputstr, string)
   defp compile_chunk({:field, number}) when is_number(number) do
-    [{:outputfld, number}]
+    makeary(:outputfld, number)
   end
-  defp compile_chunk({:field, name}), do: [{:outputspc, name}]
-  defp compile_chunk({:s_exp, name, args}), do: compile_s_exp(name, args)
+  defp compile_chunk({:field, name}), do: makeary(:outputspc, name)
+  defp compile_chunk({:s_exp, name, args}), do: compile_s_exp(name, args, true)
 
-  @spec compile_s_exp(binary(), list()) :: list()
-  defp compile_s_exp(name, args) do
-    compile_args(args) ++ [{:invoke, name, Enum.count(args)}]
+  @spec compile_s_exp(binary(), list(), boolean()) :: list()
+  defp compile_s_exp(name, args, outer) do
+    invocation = 
+      if outer do
+        invoke_to_out(name, Enum.count(args))
+      else
+        invoke_to_stack(name, Enum.count(args))
+      end
+    compile_args(args) ++ invocation
   end
 end
 

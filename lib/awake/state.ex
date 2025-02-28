@@ -39,8 +39,29 @@ defmodule Awake.State do
     }
   end
 
+  @spec replace_out(t(), non_neg_integer(), any()) :: t()
+  def replace_out(%__MODULE__{}=state, n, push) do
+    new_out = [push|state.output]
+    %{state|output: new_out, opstack: Enum.drop(state.opstack, n)}
+  end
+
+  @spec replace_stack(t(), non_neg_integer(), any()) :: t()
+  def replace_stack(%__MODULE__{}=state, n, push) do
+    new_stack = [push|Enum.drop(state.opstack, n)]
+    %{state|opstack: new_stack}
+  end
+
+  @spec to_stack(t(), any()) :: t()
+  def to_stack(%__MODULE__{}=state, value) do
+    %{state|opstack: [value|state.opstack]}
+  end
+
+  @spec to_output(t(), any()) :: t()
+  def to_output(%__MODULE__{}=state, value) do
+    %{state|output: [value|state.output]}
+  end
   # @spec duplicate(t()) :: t()
-  # def duplicate(%__MODULE__{opstack: [h|t]}=state) do
+  # def duplicate(%__MODULE__{opstack: []}=state) do
   #   %{state|opstack: [h, h|t]}
   # end
 

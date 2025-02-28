@@ -44,7 +44,8 @@ defmodule Awake.Types do
       
       @type pipeline_t :: {:pipe, atom(), list()}
 
-      # @typep scalar :: integer() | binary() | atom()
+      @type scalar :: integer() | binary() | atom()
+      @type scalars :: list(scalar())
       @type s_exp :: {:s_exp, atom(), ast_t()}
         
       # @typep symbolic_instruction :: 

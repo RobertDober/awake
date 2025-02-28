@@ -1,0 +1,115 @@
+defmodule Awake.Opcode do
+  use Awake.Types
+  alias Awake.{Builtin, Exceptions, Function}
+
+  @moduledoc ~S"""
+  Representation of Virtual Machine Instructions
+  """
+
+  defstruct function: nil, symbolic: nil, arguments: []
+
+  @type t :: %__MODULE__{function: Function.t(), symbolic: atom(), arguments: scalars()}
+  @type ts :: list(t())
+
+  @typep arg_t :: scalar() | scalars()
+  @typep stack_t :: :out | :stack
+
+  @spec representation(t()) :: tuple()
+  def representation(%__MODULE__{symbolic: symbolic, arguments: arguments}) do
+    [symbolic | arguments]
+    |> List.to_tuple()
+  end
+
+  @functions %{
+    outputfld: &Function.outputfld/2,
+    push: &Function.push/2,
+    outputspc: &Function.outputspc/2,
+    invoke: &Function.invoke/2,
+    pushspc: &Function.pushspc/2,
+    outputstr: &Function.outputstr/2
+  }
+
+  @spec invoke_to_out(atom(), non_neg_integer()) :: ts()
+  def invoke_to_out(name, arity) do
+    builtin = Builtin.make(name, arity)
+    function = make_builtin_call(builtin, arity, :out)
+    [%__MODULE__{function: function, symbolic: :invokeout, arguments: [arity]}]
+  end
+
+  @spec invoke_to_stack(atom(), non_neg_integer()) :: ts()
+  def invoke_to_stack(name, arity) do
+    builtin = Builtin.make(name, arity)
+    function = make_builtin_call(builtin, arity, :stack)
+    [%__MODULE__{function: function, symbolic: :invokestk, arguments: [arity]}]
+  end
+
+  @spec make_builtin_call(Builtin.t(), non_neg_integer(), stack_t()) :: Function.t()
+  defp make_builtin_call(builtin, arity, stack_type)
+
+  defp make_builtin_call(builtin, arity, :out) do
+    function = make_builtin_call_function(builtin, arity)
+
+    fn state ->
+      result = function.(state)
+      State.replace_out(state, arity, result)
+    end
+  end
+
+  defp make_builtin_call(builtin, arity, :stack) do
+    function = make_builtin_call_function(builtin, arity)
+
+    fn state ->
+      result = function.(state)
+      State.replace_stack(state, arity, result)
+    end
+  end
+
+  @spec make_builtin_call_function(Builtin.t(), non_neg_integer()) :: Function.t()
+  defp make_builtin_call_function(builtin, arity) do
+    if builtin.arity do
+      fn state ->
+        args = Enum.take(state.opstack, arity)
+        result = apply(builtin.function, args)
+      end
+    end
+
+    fn state ->
+      args = Enum.take(state.opstack, arity)
+      result = builtin.function.(args)
+    end
+  end
+
+  @spec make(atom(), arg_t()) :: t()
+  def make(name, args)
+
+  def make(name, args) when is_list(args) do
+    function = get_opcode(name)
+    function1 = fn state ->
+      apply(function, [state|args])
+    end
+    %__MODULE__{symbolic: name, arguments: args, function: function1}
+  end
+
+  def make(name, args), do: make(name, [args])
+
+  @spec makeary(atom(), arg_t()) :: ts()
+  def makeary(name, args), do: [make(name, args)]
+
+  @spec get_builtin(atom()) :: function()
+  defp get_builtin(name) do
+    case Map.fetch(@builtins, name) do
+      {:ok, builtin} -> builtin
+      :error -> raise Exceptions.CompilationError, "undefined builtin function: #{name}"
+    end
+  end
+
+  @spec get_opcode(atom()) :: Function.t()
+  defp get_opcode(name) do
+    case Map.fetch(@functions, name) do
+      {:ok, o} -> o
+      :error -> raise Exceptions.CompilationError, "undefined opcode: #{name}"
+    end
+  end
+end
+
+# SPDX-License-Identifier: AGPL-3.0-or-later
