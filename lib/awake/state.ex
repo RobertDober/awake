@@ -39,6 +39,16 @@ defmodule Awake.State do
     }
   end
 
+  @spec lnb_to_out(t()) :: t()
+  def lnb_to_out(%__MODULE__{}=state) do
+    %{state|output: [state.lnb + 1|state.output]}
+  end
+
+  @spec lnb_to_stack(t()) :: t()
+  def lnb_to_stack(%__MODULE__{}=state) do
+    %{state|opstack: [state.lnb + 1|state.opstack]}
+  end
+
   @spec replace_out(t(), non_neg_integer(), any()) :: t()
   def replace_out(%__MODULE__{}=state, n, push) do
     new_out = [push|state.output]

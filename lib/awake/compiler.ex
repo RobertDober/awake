@@ -40,7 +40,7 @@ defmodule Awake.Compiler do
       iex(5)> compile("%-2 %n ((")
       [
       {:outputfld, -2},
-      {:outputspc, :n},
+      {:outputspc, :lnb},
       {:outputstr, "("}
       ]
 
@@ -106,10 +106,14 @@ defmodule Awake.Compiler do
   @spec compile_chunk(ast_entry_t()) :: list()
   defp compile_chunk(ast)
   defp compile_chunk({:verb, string}), do: makeary(:outputstr, string)
+  defp compile_chunk({:field, 0}), do: makeary(:outputline, [])
+  defp compile_chunk({:field, number}) when is_number(number) and number > 0 do
+    makeary(:outputfld, number - 1)
+  end
   defp compile_chunk({:field, number}) when is_number(number) do
     makeary(:outputfld, number)
   end
-  defp compile_chunk({:field, name}), do: makeary(:outputspc, name)
+  defp compile_chunk({:field, name}), do: make_special(name, :out)
   defp compile_chunk({:s_exp, name, args}), do: compile_s_exp(name, args, true)
 
   @spec compile_s_exp(binary(), list(), boolean()) :: list()

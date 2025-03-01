@@ -1,6 +1,6 @@
 defmodule Awake.Opcode do
   use Awake.Types
-  alias Awake.{Builtin, Exceptions, Function}
+  alias Awake.{Builtin, Exceptions, Function, State}
 
   @moduledoc ~S"""
   Representation of Virtual Machine Instructions
@@ -12,21 +12,22 @@ defmodule Awake.Opcode do
   @type ts :: list(t())
 
   @typep arg_t :: scalar() | scalars()
+  @typep special_field_t :: {atom(), Function.t(), Function.t()}
   @typep stack_t :: :out | :stack
-
-  @spec representation(t()) :: tuple()
-  def representation(%__MODULE__{symbolic: symbolic, arguments: arguments}) do
-    [symbolic | arguments]
-    |> List.to_tuple()
-  end
+  
 
   @functions %{
-    outputfld: &Function.outputfld/2,
-    push: &Function.push/2,
-    outputspc: &Function.outputspc/2,
     invoke: &Function.invoke/2,
+    outputfld: &Function.outputfld/2,
+    outputline: &Function.outputline/1, 
+    outputspc: &Function.outputspc/2,
+    outputstr: &Function.outputstr/2,
+    push: &Function.push/2,
     pushspc: &Function.pushspc/2,
-    outputstr: &Function.outputstr/2
+  }
+
+  @translations %{
+    n:  {:lnb,  &State.lnb_to_out/1, &State.lnb_to_stack/1},
   }
 
   @spec invoke_to_out(atom(), non_neg_integer()) :: ts()
@@ -43,6 +44,61 @@ defmodule Awake.Opcode do
     [%__MODULE__{function: function, symbolic: :invokestk, arguments: [arity]}]
   end
 
+  @spec make(atom(), arg_t()) :: t()
+  def make(name, args)
+
+  def make(name, args) when is_list(args) do
+    function = get_opcode(name)
+    function1 = fn state ->
+      apply(function, [state|args])
+    end
+    %__MODULE__{symbolic: name, arguments: args, function: function1}
+  end
+
+  def make(name, args), do: make(name, [args])
+
+  @spec makeary(atom(), arg_t()) :: ts()
+  def makeary(name, args), do: [make(name, args)]
+
+
+  @spec make_special(atom(), stack_t()) :: ts()
+  def make_special(name, target) do
+    case Map.fetch(@translations, name) do
+      {:ok, special} -> _make_special(special, target)
+      :error -> raise CompilationError, "undefined field %#{name}"
+    end
+  end
+
+  @spec representation(t()) :: tuple()
+  def representation(%__MODULE__{symbolic: symbolic, arguments: arguments}) do
+    [symbolic | arguments]
+    |> List.to_tuple()
+  end
+
+  @spec _make_special(special_field_t(), stack_t()) :: ts()
+  defp _make_special(special, target)
+  defp _make_special({name, function, _}, :out) do
+    [%__MODULE__{function: function, symbolic: :outputspc, arguments: [name]}]
+  end
+  defp _make_special({name, _, function, _}, :stack) do
+    [%__MODULE__{function: function, symbolic: :pushspc, arguments: [name]}]
+  end
+
+  @spec get_builtin(atom()) :: function()
+  defp get_builtin(name) do
+    case Map.fetch(@builtins, name) do
+      {:ok, builtin} -> builtin
+      :error -> raise Exceptions.CompilationError, "undefined builtin function: #{name}"
+    end
+  end
+
+  @spec get_opcode(atom()) :: Function.t()
+  defp get_opcode(name) do
+    case Map.fetch(@functions, name) do
+      {:ok, o} -> o
+      :error -> raise Exceptions.CompilationError, "undefined opcode: #{name}"
+    end
+  end
   @spec make_builtin_call(Builtin.t(), non_neg_integer(), stack_t()) :: Function.t()
   defp make_builtin_call(builtin, arity, stack_type)
 
@@ -79,37 +135,6 @@ defmodule Awake.Opcode do
     end
   end
 
-  @spec make(atom(), arg_t()) :: t()
-  def make(name, args)
-
-  def make(name, args) when is_list(args) do
-    function = get_opcode(name)
-    function1 = fn state ->
-      apply(function, [state|args])
-    end
-    %__MODULE__{symbolic: name, arguments: args, function: function1}
-  end
-
-  def make(name, args), do: make(name, [args])
-
-  @spec makeary(atom(), arg_t()) :: ts()
-  def makeary(name, args), do: [make(name, args)]
-
-  @spec get_builtin(atom()) :: function()
-  defp get_builtin(name) do
-    case Map.fetch(@builtins, name) do
-      {:ok, builtin} -> builtin
-      :error -> raise Exceptions.CompilationError, "undefined builtin function: #{name}"
-    end
-  end
-
-  @spec get_opcode(atom()) :: Function.t()
-  defp get_opcode(name) do
-    case Map.fetch(@functions, name) do
-      {:ok, o} -> o
-      :error -> raise Exceptions.CompilationError, "undefined opcode: #{name}"
-    end
-  end
 end
 
 # SPDX-License-Identifier: AGPL-3.0-or-later
