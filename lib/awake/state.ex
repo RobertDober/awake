@@ -24,6 +24,9 @@ defmodule Awake.State do
     name: binary(),
     ignore: boolean()}
 
+
+
+
   @type fun_t :: (t() -> t())
 
   @spec new(Keyword.t()) :: t()
@@ -37,6 +40,103 @@ defmodule Awake.State do
       current_ts: Keyword.get(options, :current_ts, System.os_time(:microsecond)),
       start_ts: Keyword.get(options, :start_ts, System.os_time(:microsecond)),
     }
+  end
+
+  @spec mcs_to_out(t()) :: t()
+  def mcs_to_out(%__MODULE__{}=state) do
+    get_formatted_time(state, 1, :dec, :out)
+  end
+  @spec mcs_to_stack(t()) :: t()
+  def mcs_to_stack(%__MODULE__{}=state) do
+    get_formatted_time(state, 1, :dec, :stack)
+  end
+  @spec ms_to_out(t()) :: t()
+  def ms_to_out(%__MODULE__{}=state) do
+    get_formatted_time(state, 1_000, :dec, :out)
+  end
+  @spec ms_to_stack(t()) :: t()
+  def ms_to_stack(%__MODULE__{}=state) do
+    get_formatted_time(state, 1_000, :dec, :stack)
+  end
+  @spec nmcs_to_out(t()) :: t()
+  def nmcs_to_out(%__MODULE__{}=state) do
+    get_formatted_now(state, 1, :dec, :out)
+  end
+  @spec nmcs_to_stack(t()) :: t()
+  def nmcs_to_stack(%__MODULE__{}=state) do
+    get_formatted_now(state, 1, :dec, :stack)
+  end
+  @spec nms_to_out(t()) :: t()
+  def nms_to_out(%__MODULE__{}=state) do
+    get_formatted_now(state, 1_000, :dec, :out)
+  end
+  @spec nms_to_stack(t()) :: t()
+  def nms_to_stack(%__MODULE__{}=state) do
+    get_formatted_now(state, 1_000, :dec, :stack)
+  end
+  @spec ns_to_out(t()) :: t()
+  def ns_to_out(%__MODULE__{}=state) do
+    get_formatted_now(state, 1_000_000, :dec, :out)
+  end
+  @spec ns_to_stack(t()) :: t()
+  def ns_to_stack(%__MODULE__{}=state) do
+    get_formatted_now(state, 1_000_000, :dec, :stack)
+  end
+  @spec nx_to_out(t()) :: t()
+  def nx_to_out(%__MODULE__{}=state) do
+    get_formatted_now(state, 1_000_000, :hex, :out)
+  end
+  @spec nx_to_stack(t()) :: t()
+  def nx_to_stack(%__MODULE__{}=state) do
+    get_formatted_now(state, 1_000_000, :hex, :stack)
+  end
+  @spec nxm_to_out(t()) :: t()
+  def nxm_to_out(%__MODULE__{}=state) do
+    get_formatted_now(state, 1_000, :hex, :out)
+  end
+  @spec nxm_to_stack(t()) :: t()
+  def nxm_to_stack(%__MODULE__{}=state) do
+    get_formatted_now(state, 1_000, :hex, :stack)
+  end
+  @spec nxmc_to_out(t()) :: t()
+  def nxmc_to_out(%__MODULE__{}=state) do
+    get_formatted_now(state, 1, :hex, :out)
+  end
+  @spec nxmc_to_stack(t()) :: t()
+  def nxmc_to_stack(%__MODULE__{}=state) do
+    get_formatted_now(state, 1, :hex, :stack)
+  end
+  @spec s_to_out(t()) :: t()
+  def s_to_out(%__MODULE__{}=state) do
+    get_formatted_time(state, 1_000_000, :dec, :out)
+  end
+  @spec s_to_stack(t()) :: t()
+  def s_to_stack(%__MODULE__{}=state) do
+    get_formatted_time(state, 1_000_000, :dec, :stack)
+  end
+  @spec x_to_out(t()) :: t()
+  def x_to_out(%__MODULE__{}=state) do
+    get_formatted_time(state, 1_000_000, :dec, :out)
+  end
+  @spec x_to_stack(t()) :: t()
+  def x_to_stack(%__MODULE__{}=state) do
+    get_formatted_time(state, 1_000_000, :dec, :stack)
+  end
+  @spec xm_to_out(t()) :: t()
+  def xm_to_out(%__MODULE__{}=state) do
+    get_formatted_time(state, 1_000, :dec, :out)
+  end
+  @spec xm_to_stack(t()) :: t()
+  def xm_to_stack(%__MODULE__{}=state) do
+    get_formatted_time(state, 1_000, :dec, :stack)
+  end
+  @spec xmc_to_out(t()) :: t()
+  def xmc_to_out(%__MODULE__{}=state) do
+    get_formatted_time(state, 1, :dec, :out)
+  end
+  @spec xmc_to_stack(t()) :: t()
+  def xmc_to_stack(%__MODULE__{}=state) do
+    get_formatted_time(state, 1, :dec, :stack)
   end
 
   @spec lnb_to_out(t()) :: t()
@@ -60,7 +160,6 @@ defmodule Awake.State do
     new_stack = [push|Enum.drop(state.opstack, n)]
     %{state|opstack: new_stack}
   end
-
   @spec to_stack(t(), any()) :: t()
   def to_stack(%__MODULE__{}=state, value) do
     %{state|opstack: [value|state.opstack]}
@@ -70,6 +169,29 @@ defmodule Awake.State do
   def to_output(%__MODULE__{}=state, value) do
     %{state|output: [value|state.output]}
   end
+
+  @spec get_formatted_time(t(), pos_integer(), time_format(), stack_t()) :: t()
+  defp get_formatted_time(%__MODULE__{}=state, divisor, format, target) do
+    time = div(state.start_ts, divisor)
+    cond do
+      target == :stack && format == :dec -> to_stack(state, time)
+      target == :stack && format == :hex -> to_stack(state, Integer.to_string(time, 16))
+      target == :out && format == :dec -> to_output(state, time)
+      target == :out && format == :hex -> to_output(state, Integer.to_string(time, 16))
+    end
+  end
+
+  @spec get_formatted_now(t(), pos_integer(), time_format(), stack_t()) :: t()
+  defp get_formatted_now(%__MODULE__{}=state, divisor, format, target) do
+    time = div(state.current_ts, divisor)
+    cond do
+      target == :stack && format == :dec -> to_stack(state, time)
+      target == :stack && format == :hex -> to_stack(state, Integer.to_string(time, 16))
+      target == :out && format == :dec -> to_output(state, time)
+      target == :out && format == :hex -> to_output(state, Integer.to_string(time, 16))
+    end
+  end
+
   # @spec duplicate(t()) :: t()
   # def duplicate(%__MODULE__{opstack: []}=state) do
   #   %{state|opstack: [h, h|t]}

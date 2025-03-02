@@ -13,8 +13,6 @@ defmodule Awake.Opcode do
 
   @typep arg_t :: scalar() | scalars()
   @typep special_field_t :: {atom(), Function.t(), Function.t()}
-  @typep stack_t :: :out | :stack
-  
 
   @functions %{
     invoke: &Function.invoke/2,
@@ -27,7 +25,19 @@ defmodule Awake.Opcode do
   }
 
   @translations %{
-    n:  {:lnb,  &State.lnb_to_out/1, &State.lnb_to_stack/1},
+    mcs: {:tmicros, &<at>State.mcs_to_out/1, &State.mcs_to_stack/1},</at>
+    ms: {:tmillis, &State.ms_to_out/1, &State.ms_to_stack/1},
+    n: {:lnb,  &State.lnb_to_out/1, &State.lnb_to_stack/1},
+    nmcs: {:nowmicro, &State.nmcs_to_out/1, &State.nmcs_to_stack/1},
+    nms: {:nowmillis, &State.nms_to_out/1, &State.nms_to_stack/1},
+    ns: {:nows, &State.ns_to_out/1, &State.ns_to_stack/1},
+    nx: {:nowhex, &State.nx_to_out/1, &State.nx_to_stack/1},
+    nxm: {:nowhexmilli, &State.nxm_to_out/1, &State.nxm_to_stack/1},
+    nxmc: {:nowhexmicro, &State.nxmc_to_out/1, &State.nxmc_to_stack/1},
+    s: {:tsec, &State.s_to_out/1, &State.s_to_stack/1},
+    x: {:xsec, &State.x_to_out/1, &State.x_to_stack/1},
+    xm: {:xmillis, &State.xm_to_out/1, &State.xm_to_stack/1},
+    xmc: {:xmicros, &State.xmc_to_out/1, &State.xmc_to_stack/1},
   }
 
   @spec invoke_to_out(atom(), non_neg_integer()) :: ts()

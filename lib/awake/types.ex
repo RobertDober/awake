@@ -41,13 +41,16 @@ defmodule Awake.Types do
 
       @type parse_result(t) :: {binary(), t}
       @type parse_result?(t) :: maybe({binary(), t})
-      
+
       @type pipeline_t :: {:pipe, atom(), list()}
 
+      @type s_exp :: {:s_exp, atom(), ast_t()}
       @type scalar :: integer() | binary() | atom()
       @type scalars :: list(scalar())
-      @type s_exp :: {:s_exp, atom(), ast_t()}
-        
+      @type stack_t :: :out | :stack
+
+      @type time_format :: :dec | :hex
+
       # @typep symbolic_instruction :: 
       # {arity2_instruction(), scalar(), scalar()} |
       # {arity1_instruction(), scalar()} |
