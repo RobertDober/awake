@@ -25,7 +25,7 @@ defmodule Awake.Opcode do
   }
 
   @translations %{
-    mcs: {:tmicros, &<at>State.mcs_to_out/1, &State.mcs_to_stack/1},</at>
+    mcs: {:tmicros, &State.mcs_to_out/1, &State.mcs_to_stack/1},
     ms: {:tmillis, &State.ms_to_out/1, &State.ms_to_stack/1},
     n: {:lnb,  &State.lnb_to_out/1, &State.lnb_to_stack/1},
     nmcs: {:nowmicro, &State.nmcs_to_out/1, &State.nmcs_to_stack/1},

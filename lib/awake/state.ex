@@ -29,6 +29,15 @@ defmodule Awake.State do
 
   @type fun_t :: (t() -> t())
 
+  @spec initial() :: t()
+  def initial do
+    now = System.os_time(:microsecond)
+    %__MODULE__{
+      current_ts: now,
+      start_ts: now,
+    }
+  end
+
   @spec new(Keyword.t()) :: t()
   def new(options) do
     line = Keyword.fetch!(options, :line)
@@ -39,6 +48,20 @@ defmodule Awake.State do
       name: Keyword.get(options, :name),
       current_ts: Keyword.get(options, :current_ts, System.os_time(:microsecond)),
       start_ts: Keyword.get(options, :start_ts, System.os_time(:microsecond)),
+    }
+  end
+
+  @spec update(t(), binary()) :: t()
+  def update(%__MODULE__{}=state, line) do
+    fields = String.split(line)
+    lnb = state.lnb+1
+    now = System.os_time(:microsecond)
+    %{
+      state |
+      current_ts: now,
+      fields: fields,
+      line: line,
+      lnb: lnb
     }
   end
 
