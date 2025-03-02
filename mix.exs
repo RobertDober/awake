@@ -10,7 +10,7 @@ defmodule Awake.MixProject do
   def project do
     [
       aliases: [docs: &build_docs/1],
-      app: :ewok,
+      app: :awake,
       deps: deps(),
       description: "Map lines with a powerful mini language",
       elixir: "~> 1.18",
@@ -68,6 +68,7 @@ defmodule Awake.MixProject do
     [
       {:dialyxir, "~> 1.4.5", only: [:dev, :test], runtime: false},
       {:excoveralls, "~> 0.18.5", only: [:test]},
+      {:ex_aequo, "~> 0.6.8"},
       # {:minipeg, "~> 0.7.5"},
     ]
   end

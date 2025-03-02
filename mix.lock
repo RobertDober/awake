@@ -1,7 +1,8 @@
 %{
   "dialyxir": {:hex, :dialyxir, "1.4.5", "ca1571ac18e0f88d4ab245f0b60fa31ff1b12cbae2b11bd25d207f865e8ae78a", [:mix], [{:erlex, ">= 0.2.7", [hex: :erlex, repo: "hexpm", optional: false]}], "hexpm", "b0fb08bb8107c750db5c0b324fa2df5ceaa0f9307690ee3c1f6ba5b9eb5d35c3"},
   "erlex": {:hex, :erlex, "0.2.7", "810e8725f96ab74d17aac676e748627a07bc87eb950d2b83acd29dc047a30595", [:mix], [], "hexpm", "3ed95f79d1a844c3f6bf0cea61e0d5612a42ce56da9c03f01df538685365efb0"},
+  "ex_aequo": {:hex, :ex_aequo, "0.6.8", "423e5196cdc6b4846d2d85e86b3d7c5e565f80110b9a99359fe3d1bf88b40d35", [:mix], [{:minipeg, "~> 0.5.0", [hex: :minipeg, repo: "hexpm", optional: false]}], "hexpm", "f0a18de2c0d1c99a97144d83c915a7459ef39378c490aae4859a36f1e37ff28e"},
   "excoveralls": {:hex, :excoveralls, "0.18.5", "e229d0a65982613332ec30f07940038fe451a2e5b29bce2a5022165f0c9b157e", [:mix], [{:castore, "~> 1.0", [hex: :castore, repo: "hexpm", optional: true]}, {:jason, "~> 1.0", [hex: :jason, repo: "hexpm", optional: false]}], "hexpm", "523fe8a15603f86d64852aab2abe8ddbd78e68579c8525ae765facc5eae01562"},
   "jason": {:hex, :jason, "1.4.4", "b9226785a9aa77b6857ca22832cffa5d5011a667207eb2a0ad56adb5db443b8a", [:mix], [{:decimal, "~> 1.0 or ~> 2.0", [hex: :decimal, repo: "hexpm", optional: true]}], "hexpm", "c5eb0cab91f094599f94d55bc63409236a8ec69a21a67814529e8d5f6cc90b3b"},
-  "minipeg": {:hex, :minipeg, "0.7.3", "35fe23594b5dff9b51cc32909c47699c624dc3cbd095e4d3b83416df0c4ddfd2", [:mix], [], "hexpm", "857f881c300cac2c443d9f1e61fd3db33739b587e413c92daf79f208527e81c6"},
+  "minipeg": {:hex, :minipeg, "0.5.4", "f8722bc5f8c337d4a92104fd2aae9e094e5676939c45ca33bf2203bc17bffda2", [:mix], [], "hexpm", "ed2744e098896a00987dd69f0bd328f9b155bdc1d17ddb6630df112b5d5640ae"},
 }
