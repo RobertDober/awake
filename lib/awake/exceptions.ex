@@ -3,6 +3,15 @@ defmodule Awake.Exceptions do
   Defines all exceptions used in this library
   """
 
+  defmodule CliError do
+    defexception [:message]
+
+    @impl true
+    def exception(value) do
+      %__MODULE__{message: value}
+    end
+  end
+
   defmodule CompilationError do
     defexception [:message]
 

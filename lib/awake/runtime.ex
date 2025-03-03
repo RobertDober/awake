@@ -15,7 +15,6 @@ defmodule Awake.Runtime do
     if !result.ignore do
       output_fn.(result.output |> Enum.reverse |> Enum.join)
     end
-    :ok
   end
 
   @spec run(Awake.State.t, list(function())) :: Awake.State.t
