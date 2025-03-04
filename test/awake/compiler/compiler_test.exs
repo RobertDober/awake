@@ -1,33 +1,53 @@
 defmodule Test.Awake.Compiler.CompilerTest do
   use Support.CompilerTestCase
 
-  setup :compile_pattern
+  describe "basic field, input line" do
+    check_compilation "%", [{:outputline}]
 
-  describe "simple field" do
-    @pattern "%"
-    test "whole line", compiled do
-      assert compiled[:symbolic] == [{:outputline}]
-    end
-    test "functional", compiled do
-      result = run(compiled, "hello line")
-      assert result.output == ["hello line"]
+    describe_result "%", "input line" do
+      assert ["input line"] == result.output
     end
   end
 
-  describe "field and line number" do
-    @pattern "%1 %n"
-    test "symbolic", compiled do
-      assert compiled[:symbolic] == [{:outputfld, 0}, {:outputspc, :lnb}]
+  describe "a subfield, verbatim text and line count" do
+    check_compilation "%2  some text%n",
+    [{:outputfld, 1}, {:outputstr, " some text"}, {:outputspc, :lnb}]
+
+    describe_result "%2  some text%n", "alpha beta" do
+      assert [0, " some text", "alpha"] 
     end
-    test "functional", compiled do
-      result = run(compiled, "hello line")
-      assert result.output == [1, "hello"]
+
+    # Let's change the line number
+    describe_result "%2  some text%n", "alpha beta", 42 do
+      assert [42, " some text", "alpha"] 
     end
   end
 
-  defp compile_pattern(_) do
-    {symbolic, func} = comp(@pattern)
-    [code: func, symbolic: symbolic]
+  describe "negative field and timestamps" do
+    check_compilation "Last%-1 %s %x %xm",
+    [{:outputstr, "Last"}, {:outputfld, -1}, {:outputspc, :tsec}, {:outputspc, :xsec}, {:outputspc, :xmillis}]
+
+    describe_result "%-1 %s %x %xm", "alpha beta" do
+      secs = div(result.start_ts, 1_000_000)
+      xsec = secs |> Integer.to_string(16)
+      xmil = div(result.start_ts, 1_000) |> Integer.to_string(16)
+      assert [xmil, xsec, secs, "beta"]
+    end
   end
+
+#   check_compilation "%1 %n", "hello world",
+#   [{:outputfld, 0}, {:outputspc, :lnb}], 
+#     "hello0"
+
+#   check_compilation "Hello: %-1", "universe",
+#   [{:outputstr, "Hello: "}, {:outputfld, -1}],
+#     "Hello: universe"
+
+#   check_compilation "
+#   describe_result "Hello: %s", "" do
+#     secs = div(result.start_ts, 1_000_000)
+#     assert [secs, "Hello: "] == result.output
+#   end
+
 end
 # SPDX-License-Identifier: AGPL-3.0-or-later

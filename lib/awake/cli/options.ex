@@ -107,13 +107,14 @@ defmodule Awake.Cli.Options do
   @spec check_input!(t()) :: t()
   defp check_input!(options) 
   defp check_input!(%__MODULE__{input: nil}=options), do: options
-  defp check_input!(%__MODULE__{input: input}=options) do
+  defp check_input!(%__MODULE__{input: input}=options) when is_binary(input) do
     if File.exists?(input) do
       options
     else
       raise CliError, "the file #{input}, specified via the  -i|--input option does not exist"
     end
   end
+  defp check_input!(%__MODULE__{}=options), do: options
 
   @spec check_parse!(t()) :: t()
   defp check_parse!(options)

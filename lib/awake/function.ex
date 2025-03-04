@@ -25,7 +25,9 @@ defmodule Awake.Function do
   end
   def pushspc(%State{}=state) do
   end
-  def outputstr(%State{}=state) do
+  @spec outputstr(t(), binary()) :: t()
+  def outputstr(%State{}=state, str) do
+    State.to_output(state, str)
   end
 
 

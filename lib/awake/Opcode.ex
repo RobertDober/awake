@@ -75,7 +75,7 @@ defmodule Awake.Opcode do
   def make_special(name, target) do
     case Map.fetch(@translations, name) do
       {:ok, special} -> _make_special(special, target)
-      :error -> raise CompilationError, "undefined field %#{name}"
+      :error -> raise Exceptions.CompilationError, "undefined field %#{name}"
     end
   end
 

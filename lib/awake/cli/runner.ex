@@ -39,7 +39,7 @@ defmodule Awake.Cli.Runner do
   end
   def run(%Options{byte_code: nil, output: output, file: file, input: input, pattern: pattern}=options) do
     compiled = Compiler.compile(pattern || File.read!(file), false)
-    stream = IO.stream(make_input_device(input), :line) |> Stream.map(&String.trim_trailing/1)
+    stream = make_input_stream(input) |> Stream.map(&String.trim_trailing/1)
     output_fn = line_writer(make_output_device(output))
     Runtime.run_on_input(stream, compiled, output_fn)
   end
@@ -54,11 +54,12 @@ defmodule Awake.Cli.Runner do
     end
   end
 
-  defp make_input_device(input)
-  defp make_input_device(nil), do: :stdio
-  defp make_input_device(input) do
-    File.open!(input, [:read])
+  defp make_input_stream(input)
+  defp make_input_stream(nil), do: IO.stream(:stdio, :line)
+  defp make_input_stream(filename) when is_binary(filename) do
+    IO.stream(File.open!(filename), :line)
   end
+  defp make_input_stream(list), do: list
 
   defp make_output_device(output)
   defp make_output_device(nil), do: :stdio
