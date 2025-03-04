@@ -61,7 +61,9 @@ defmodule Awake.State do
       current_ts: now,
       fields: fields,
       line: line,
-      lnb: lnb
+      lnb: lnb,
+      output: [],
+      opstack: [],
     }
   end
 
@@ -164,7 +166,7 @@ defmodule Awake.State do
 
   @spec lnb_to_out(t()) :: t()
   def lnb_to_out(%__MODULE__{}=state) do
-    %{state|output: [state.lnb + 1|state.output]}
+    %{state|output: [state.lnb|state.output]}
   end
 
   @spec lnb_to_stack(t()) :: t()
