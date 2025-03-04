@@ -26,4 +26,4 @@ ewok-*.tar
 /tmp/
 .local
 tags
-awake
+/awake
