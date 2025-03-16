@@ -1,6 +1,7 @@
 defmodule Awake.Builtin do
   use Awake.Types
   alias Awake.Exceptions.CompilationError
+  alias Awake.Builtin.BuiltinFunctions, as: F
 
   @moduledoc ~S"""
   A wrapper around builtin functions, from the Builtin module
@@ -11,7 +12,8 @@ defmodule Awake.Builtin do
   @type t :: %__MODULE__{name: atom(), arity: maybe(non_neg_integer()), function: function()}
 
   @builtins %{
-  +: &Builtins._add/1,
+  +: &F._add/1,
+
   }
 
   @spec make(atom(), non_neg_integer()) :: t()

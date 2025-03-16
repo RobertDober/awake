@@ -49,7 +49,7 @@ defmodule Awake.Compiler do
       iex(6)> compile("%-2%n() ((")
       [
       {:outputfld, -2},
-      {:outputspc, :n},
+      {:outputspc, :lnb},
       {:outputstr, " ("}
       ]
 
@@ -64,7 +64,7 @@ defmodule Awake.Compiler do
       iex(8)> compile("%(+ %n (rnd 20))")
       [
       {:outputline},
-      {:pushspc, :n},
+      {:pushspc, :lnb},
       {:push, 20},
       {:invoke, :rnd, 1},
       {:invoke, :+, 2},
@@ -124,7 +124,8 @@ defmodule Awake.Compiler do
       else
         invoke_to_stack(name, Enum.count(args))
       end
-    compile_args(args) ++ invocation
+    compiled_args = compile_args(args)
+    compiled_args ++ invocation
   end
 end
 

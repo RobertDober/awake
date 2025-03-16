@@ -39,7 +39,7 @@ defmodule Awake.Cli.Runner do
   end
   def run(%Options{byte_code: nil, output: output, file: file, input: input, pattern: pattern}=options) do
     compiled = Compiler.compile(pattern || File.read!(file), false)
-    stream = make_input_stream(input) |> Stream.map(&String.trim_trailing/1)
+    stream = make_input_stream(input)  |> IO.inspect() |> Stream.map(&String.trim_trailing/1)
     output_fn = line_writer(make_output_device(output))
     Runtime.run_on_input(stream, compiled, output_fn)
   end

@@ -7,13 +7,24 @@ defmodule Support.RunInterface do
 
   import ExUnit.CaptureIO
 
+  defmacro test_run(pattern, input, expected) do
+    name = "test_run#{pattern} -> #{inspect input}"
+    quote do
+      test unquote(name) do
+      result = run_with_input(unquote(pattern), unquote(input))
+      assert lines(unquote(expected)) == result
+    end
+    end
+  end
+
   def run_with_input(pattern, input, opts \\ []) do
     options = option_input_data(pattern, input, opts)
     capture_io(:stdio, fn ->
       Runner.run(options)
     end)
   end
-  defp option_input_data(pattern, input, opts \\ []) do
+
+  defp option_input_data(pattern, input, opts) do
     opts
     |> Keyword.put(:input, input)
     |> Options.from_kwds(pattern)
